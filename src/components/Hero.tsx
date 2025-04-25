@@ -3,6 +3,12 @@
 import { BB8_2D } from "./BB8_2D";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Starfighter from "./Starfighter";
+import { StarFighter3D } from "./StarFighter3D";
+import { Planet3D } from "./Planet3D";
+import { Saturn3D } from "./Saturn3D";
+import { Neptune3D } from "./Neptune3D";
+import { Juno3D } from "./Juno3D";
+import { AnimatedText } from "./AnimatedText";
 
 export function Hero() {
 	const [stars, setStars] = useState<
@@ -76,6 +82,15 @@ export function Hero() {
 			ref={heroRef}
 			className="relative h-[calc(100vh-32rem)] overflow-hidden cursor-none"
 		>
+			{/* 3D Models */}
+			<div className="absolute inset-0 w-full h-full z-10">
+				<Saturn3D />
+				<StarFighter3D />
+				<Planet3D />
+				<Neptune3D />
+				<Juno3D />
+			</div>
+
 			{/* Custom Cursor */}
 			{isCursorInHero && !isCursorInNavbar && (
 				<div
@@ -157,13 +172,13 @@ export function Hero() {
 				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.3)_70%,_rgba(0,0,0,0.4)_100%)]" />
 
 				{/* Floating Satellite */}
-				<div className="absolute top-[15%] right-[55%] w-[48px] h-[48px] animate-float-around">
+				{/* <div className="absolute top-[15%] right-[70%] w-[42px] h-[42px] animate-float-around">
 					<img
 						src="/assets/space_satellite.png"
 						alt="Satellite"
 						className="w-full h-full object-contain"
 					/>
-				</div>
+				</div> */}
 
 				{/* Floating Alien Ship */}
 				<div className="absolute top-[25%] right-[35%] w-[48px] h-[48px] animate-float-ship">
@@ -173,15 +188,6 @@ export function Hero() {
 						className="w-full h-full object-contain"
 					/>
 				</div>
-
-				{/* Fixed Purple Star */}
-				{/* <div className="absolute top-[30%] right-[15%] w-[150px] h-[150px]">
-					<img
-						src="/assets/purple_star.png"
-						alt="Purple Star"
-						className="w-full h-full object-contain"
-					/>
-				</div> */}
 
 				{/* Floating Asteroid */}
 				<div className="absolute top-[60%] left-[30%] w-[32px] h-[32px] animate-float-asteroid">
@@ -249,23 +255,23 @@ export function Hero() {
 				</div>
 
 				{/* Planets */}
-				<div className="absolute top-[15%] left-[10%] w-[40px] h-[40px] animate-planet-glow">
+				{/* <div className="absolute top-[15%] left-[10%] w-[40px] h-[40px] animate-planet-glow">
 					<img
 						src="/assets/planet_02.png"
 						alt="Planet"
 						className="w-full h-full object-contain"
 					/>
 					<div className="absolute inset-0 w-full h-full bg-blue-500/20 blur-[20px] rounded-full"></div>
-				</div>
+				</div> */}
 
-				<div className="absolute top-[60%] right-[15%] w-[100px] h-[100px] animate-planet-glow">
+				{/* <div className="absolute top-[60%] right-[15%] w-[100px] h-[100px] animate-planet-glow">
 					<img
 						src="/assets/planet_03.png"
 						alt="Planet"
 						className="w-full h-full object-contain"
 					/>
 					<div className="absolute inset-0 w-full h-full bg-purple-500/20 blur-[30px] rounded-full"></div>
-				</div>
+				</div> */}
 
 				<div className="absolute top-[30%] right-[30%] w-[120px] h-[120px] animate-planet-glow">
 					<img
@@ -276,14 +282,14 @@ export function Hero() {
 					<div className="absolute inset-0 w-full h-full bg-orange-500/20 blur-[20px] rounded-full"></div>
 				</div>
 
-				<div className="absolute top-[70%] left-[25%] w-[90px] h-[90px] animate-planet-glow">
+				{/* <div className="absolute top-[70%] left-[25%] w-[90px] h-[90px] animate-planet-glow">
 					<img
 						src="/assets/planet_05.png"
 						alt="Planet"
 						className="w-full h-full object-contain"
 					/>
 					<div className="absolute inset-0 w-full h-full bg-green-500/20 blur-[20px] rounded-full"></div>
-				</div>
+				</div> */}
 			</div>
 
 			{/* Content */}
@@ -293,7 +299,12 @@ export function Hero() {
 					<div className="relative">
 						<div className="absolute -left-8 top-0 bottom-0 w-1 bg-yellow-400"></div>
 						<h1 className="text-5xl font-bold text-yellow-400 drop-shadow-lg font-star-wars tracking-wider">
-							"Do or do not, there is no try"
+							<AnimatedText
+								text='"Do or do not, there is no try"'
+								typingSpeed={100}
+								erasingSpeed={50}
+								delay={2000}
+							/>
 						</h1>
 						<p className="text-right text-xl text-yellow-400/80 drop-shadow mt-2 font-star-wars">
 							- Master Yoda

@@ -1,6 +1,32 @@
 "use client";
 
 import { HyperJump } from "./HyperJump";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
+// Dynamically import the Canvas component with no SSR
+const Canvas = dynamic(
+	() => import("@react-three/fiber").then((mod) => mod.Canvas),
+	{
+		ssr: false,
+	}
+);
+
+// Dynamically import the YWingFighter component
+const YWingFighter = dynamic(
+	() => import("./YWingFighter").then((mod) => mod.YWingFighter),
+	{
+		ssr: false,
+	}
+);
+
+// Dynamically import the OrbitControls component
+const OrbitControls = dynamic(
+	() => import("@react-three/drei").then((mod) => mod.OrbitControls),
+	{
+		ssr: false,
+	}
+);
 
 interface Article {
 	id: number;
@@ -43,12 +69,33 @@ const starWarsArticles: Article[] = [
 
 export function Articles() {
 	return (
-		<section className="py-8 bg-black dark:bg-gray-900 transition-colors duration-200">
-			<div className="container mx-auto px-4">
-				<h2 className="text-2xl font-bold text-yellow-400 dark:text-yellow-400 mb-6 font-star-wars">
+		<section className="bg-black dark:bg-gray-900 transition-colors duration-200 relative">
+			<div className="absolute inset-0 bg-[url('/assets/starwars_desert.jpg')] bg-cover bg-center opacity-20"></div>
+			<div className="relative z-10 h-full w-full">
+				{/* <div className="h-full w-full relative">
+					<Suspense
+						fallback={
+							<div className="w-full h-full bg-gray-800 animate-pulse" />
+						}
+					>
+						<Canvas camera={{ position: [0, 5, 10], fov: 50 }}>
+							<ambientLight intensity={0.5} />
+							<directionalLight
+								position={[10, 10, 5]}
+								intensity={1}
+							/>
+							<YWingFighter />
+							<OrbitControls
+								enableZoom={false}
+								enablePan={false}
+							/>
+						</Canvas>
+					</Suspense>
+				</div> */}
+				{/* <h2 className="text-2xl font-bold text-yellow-400 dark:text-yellow-400 mb-6 font-star-wars">
 					Star Wars Chronicles
-				</h2>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				</h2> */}
+				{/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{starWarsArticles.map((article) => (
 						<article
 							key={article.id}
@@ -92,7 +139,7 @@ export function Articles() {
 							</div>
 						</article>
 					))}
-				</div>
+				</div> */}
 			</div>
 		</section>
 	);
