@@ -8,7 +8,12 @@ import { Planet3D } from "./Planet3D";
 import { Saturn3D } from "./Saturn3D";
 import { Neptune3D } from "./Neptune3D";
 import { Juno3D } from "./Juno3D";
+import { BlackHole3D } from "./BlackHole3D";
+import { Sun3D } from "./Sun3D";
 import { AnimatedText } from "./AnimatedText";
+import { ControlPanel } from "./ControlPanel";
+import { XWingCursor } from "./XWingCursor";
+import { YWingCursor } from "./YWingCursor";
 
 export function Hero() {
 	const [stars, setStars] = useState<
@@ -28,7 +33,14 @@ export function Hero() {
 	const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 	const [isCursorInHero, setIsCursorInHero] = useState(false);
 	const [isCursorInNavbar, setIsCursorInNavbar] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 	const heroRef = useRef<HTMLElement>(null);
+
+	// Control panel states
+	const [dustSpeed, setDustSpeed] = useState(1);
+	const [starfighterSpeed, setStarfighterSpeed] = useState(1);
+	const [planetSize, setPlanetSize] = useState(1);
+	const [spaceColor, setSpaceColor] = useState("#161B33");
 
 	const handleMouseMove = useCallback((e: MouseEvent) => {
 		setCursorPosition({ x: e.clientX, y: e.clientY });
@@ -50,13 +62,15 @@ export function Hero() {
 	}, []);
 
 	useEffect(() => {
+		setIsMounted(true);
+
 		// Generate stars data
 		const starsData = Array.from({ length: 200 }, () => ({
 			top: `${Math.random() * 100}%`,
 			left: `${Math.random() * 100}%`,
 			opacity: Math.random() * 0.9 + 0.1,
 			delay: `${Math.random() * 3}s`,
-			speed: Math.random() * 2 + 1,
+			speed: (Math.random() * 2 + 1) * dustSpeed,
 			isGlowing: Math.random() < 0.2,
 			glowDelay: `${Math.random() * 5}s`,
 		}));
@@ -75,7 +89,11 @@ export function Hero() {
 		return () => {
 			window.removeEventListener("mousemove", handleMouseMove);
 		};
-	}, [handleMouseMove]);
+	}, [handleMouseMove, dustSpeed]);
+
+	if (!isMounted) {
+		return null;
+	}
 
 	return (
 		<section
@@ -84,11 +102,13 @@ export function Hero() {
 		>
 			{/* 3D Models */}
 			<div className="absolute inset-0 w-full h-full z-10">
-				<Saturn3D />
-				<StarFighter3D />
-				<Planet3D />
-				<Neptune3D />
-				<Juno3D />
+				<Planet3D scale={planetSize} />
+				<Saturn3D speed={starfighterSpeed} scale={planetSize} />
+				<StarFighter3D speed={starfighterSpeed} />
+				<Neptune3D scale={planetSize} />
+				<Juno3D scale={planetSize} />
+				<Sun3D scale={planetSize} speed={starfighterSpeed} />
+				{/* <BlackHole3D scale={planetSize} speed={starfighterSpeed} /> */}
 			</div>
 
 			{/* Custom Cursor */}
@@ -97,7 +117,9 @@ export function Hero() {
 					className="fixed pointer-events-none z-50"
 					style={{
 						transform: `translate(${cursorPosition.x}px, ${cursorPosition.y}px)`,
-						transition: "transform 0.1s ease-out",
+						transition: `transform ${
+							0.1 / starfighterSpeed
+						}s ease-out`,
 					}}
 				>
 					<Starfighter x={0} y={0} scale={0.6} rotation={0} />
@@ -107,7 +129,13 @@ export function Hero() {
 			{/* Galaxy Background */}
 			<div className="absolute inset-0 z-0">
 				{/* Deep Space */}
-				<div className="absolute inset-0 bg-gradient-to-b from-[#090921] via-[#161B33] to-[#0F1644]" />
+				<div
+					className="absolute inset-0 bg-gradient-to-b from-[#090921] via-[#161B33] to-[#0F1644]"
+					style={{
+						backgroundColor: spaceColor,
+						transition: "background-color 0.3s ease",
+					}}
+				/>
 
 				{/* Stars Layer */}
 				<div className="absolute inset-0 transform-style-3d perspective-[1000px]">
@@ -330,6 +358,18 @@ export function Hero() {
 				</div>
 			</div>
 
+			{/* Control Panel */}
+			<ControlPanel
+				dustSpeed={dustSpeed}
+				onDustSpeedChange={setDustSpeed}
+				starfighterSpeed={starfighterSpeed}
+				onStarfighterSpeedChange={setStarfighterSpeed}
+				planetSize={planetSize}
+				onPlanetSizeChange={setPlanetSize}
+				spaceColor={spaceColor}
+				onSpaceColorChange={setSpaceColor}
+			/>
+
 			{/* Animations */}
 			<style jsx global>{`
 				@font-face {
@@ -353,7 +393,8 @@ export function Hero() {
 				}
 				@keyframes falling-star {
 					0% {
-						transform: translateZ(-3000px) scale(0.1);
+						transform: translateZ(-3000px) scale(0.1)
+							translateY(100%);
 						opacity: 0;
 					}
 					10% {
@@ -363,14 +404,13 @@ export function Hero() {
 						opacity: 1;
 					}
 					100% {
-						transform: translateZ(2000px) scale(5);
+						transform: translateZ(1000px) scale(4) translateY(-100%);
 						opacity: 0;
 					}
 				}
 				.animate-falling-star {
 					animation: falling-star linear infinite;
-					transform-style: preserve-3d;
-					perspective: 2000px;
+					animation-duration: ${3 / dustSpeed}s;
 				}
 				@keyframes glow {
 					0% {

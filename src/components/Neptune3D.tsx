@@ -1,13 +1,18 @@
 "use client";
 
+import React from "react";
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
+interface Neptune3DProps {
+	scale?: number;
+}
+
 const SCALE = 0.0004;
 
-function NeptuneModel() {
+function NeptuneModel({ scale = 1 }: Neptune3DProps) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/neptune_nasa.glb");
 
@@ -21,7 +26,7 @@ function NeptuneModel() {
 	return (
 		<group
 			ref={group}
-			scale={[SCALE, SCALE, SCALE]}
+			scale={[scale * SCALE, scale * SCALE, scale * SCALE]}
 			rotation={[Math.PI / 5, 0, 0]} // Slight tilt for better visibility
 		>
 			<primitive object={scene} />
@@ -29,9 +34,12 @@ function NeptuneModel() {
 	);
 }
 
-export function Neptune3D() {
+export function Neptune3D({ scale = 1 }: Neptune3DProps) {
 	return (
-		<div className="absolute bottom-[32%] right-[40%] w-full h-full">
+		<div
+			className="absolute bottom-[32%] right-[40%] w-full h-full"
+			style={{ transform: `scale(${scale})` }}
+		>
 			<Canvas
 				camera={{ position: [0, 0, 5], fov: 60 }}
 				style={{ background: "transparent" }}
@@ -55,7 +63,7 @@ export function Neptune3D() {
 				/>
 
 				{/* Neptune model */}
-				<NeptuneModel />
+				<NeptuneModel scale={scale} />
 
 				{/* Disable orbit controls for static display */}
 				<OrbitControls

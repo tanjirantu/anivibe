@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
@@ -7,7 +8,11 @@ import * as THREE from "three";
 
 const SCALE = 0.02;
 
-function JunoModel() {
+interface Juno3DProps {
+	scale?: number;
+}
+
+function JunoModel({ scale = 1 }: Juno3DProps) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/juno.glb");
 
@@ -24,7 +29,7 @@ function JunoModel() {
 	return (
 		<group
 			ref={group}
-			scale={[SCALE, SCALE, SCALE]}
+			scale={[scale * SCALE, scale * SCALE, scale * SCALE]}
 			rotation={[Math.PI / 4, 0, 0]} // Tilt for better visibility
 		>
 			<primitive object={scene} />
@@ -32,9 +37,12 @@ function JunoModel() {
 	);
 }
 
-export function Juno3D() {
+export function Juno3D({ scale = 1 }: Juno3DProps) {
 	return (
-		<div className="absolute top-[-30%] right-[27%] w-full h-full">
+		<div
+			className="absolute top-[-30%] right-[27%] w-full h-full"
+			style={{ transform: `scale(${scale})` }}
+		>
 			<Canvas
 				camera={{ position: [0, 0, 5], fov: 60 }}
 				style={{ background: "transparent" }}

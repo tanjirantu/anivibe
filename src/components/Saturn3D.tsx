@@ -1,20 +1,26 @@
 "use client";
 
+import React from "react";
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
+interface Saturn3DProps {
+	speed?: number;
+	scale?: number;
+}
+
 const SCALE = 0.006;
 
-function SaturnModel() {
+function SaturnModel({ speed = 1 }: { speed?: number }) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/saturn_v1.1.glb");
 
 	useFrame((state, delta) => {
 		if (group.current) {
 			// Rotate the planet
-			group.current.rotation.y += delta * 0.2;
+			group.current.rotation.y += delta * speed * 0.2;
 		}
 	});
 
@@ -29,9 +35,12 @@ function SaturnModel() {
 	);
 }
 
-export function Saturn3D() {
+export function Saturn3D({ speed = 1, scale = 1 }: Saturn3DProps) {
 	return (
-		<div className="absolute top-[30%] right-[15%] w-full h-full">
+		<div
+			className="absolute top-[30%] right-[15%] w-full h-full"
+			style={{ transform: `scale(${scale})` }}
+		>
 			<Canvas
 				camera={{ position: [0, 0, 5], fov: 70 }}
 				// style={{ background: "transparent" }}
@@ -55,7 +64,7 @@ export function Saturn3D() {
 				/>
 
 				{/* Saturn model */}
-				<SaturnModel />
+				<SaturnModel speed={speed} />
 
 				{/* Disable orbit controls for static display */}
 				<OrbitControls
