@@ -51,7 +51,7 @@ export function Hero() {
 
 	useEffect(() => {
 		// Generate stars data
-		const starsData = Array.from({ length: 50 }, () => ({
+		const starsData = Array.from({ length: 200 }, () => ({
 			top: `${Math.random() * 100}%`,
 			left: `${Math.random() * 100}%`,
 			opacity: Math.random() * 0.9 + 0.1,
@@ -110,9 +110,9 @@ export function Hero() {
 				<div className="absolute inset-0 bg-gradient-to-b from-[#090921] via-[#161B33] to-[#0F1644]" />
 
 				{/* Stars Layer */}
-				<div className="absolute inset-0">
+				<div className="absolute inset-0 transform-style-3d perspective-[1000px]">
 					{stars.map((star, i) => (
-						<div key={`star-${i}`}>
+						<div key={`star-${i}`} className="transform-style-3d">
 							<div
 								className={`absolute w-[2px] h-[2px] bg-white rounded-full animate-falling-star ${
 									star.isGlowing ? "animate-glow" : ""
@@ -154,7 +154,7 @@ export function Hero() {
 				</div>
 
 				{/* Shooting Stars */}
-				<div className="absolute inset-0">
+				{/* <div className="absolute inset-0">
 					{shootingStars.map((star, i) => (
 						<div
 							key={i}
@@ -166,7 +166,7 @@ export function Hero() {
 							}}
 						/>
 					))}
-				</div>
+				</div> */}
 
 				{/* Cosmic Dust */}
 				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.3)_70%,_rgba(0,0,0,0.4)_100%)]" />
@@ -353,7 +353,7 @@ export function Hero() {
 				}
 				@keyframes falling-star {
 					0% {
-						transform: translateY(-100vh);
+						transform: translateZ(-3000px) scale(0.1);
 						opacity: 0;
 					}
 					10% {
@@ -363,12 +363,14 @@ export function Hero() {
 						opacity: 1;
 					}
 					100% {
-						transform: translateY(100vh);
+						transform: translateZ(2000px) scale(5);
 						opacity: 0;
 					}
 				}
 				.animate-falling-star {
 					animation: falling-star linear infinite;
+					transform-style: preserve-3d;
+					perspective: 2000px;
 				}
 				@keyframes glow {
 					0% {
@@ -681,6 +683,12 @@ export function Hero() {
 				}
 				.animate-planet-glow {
 					animation: planet-glow 4s ease-in-out infinite;
+				}
+				.transform-style-3d {
+					transform-style: preserve-3d;
+				}
+				.perspective-1000 {
+					perspective: 1000px;
 				}
 			`}</style>
 		</section>
