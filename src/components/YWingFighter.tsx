@@ -14,7 +14,7 @@ export function YWingFighter() {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/assets/starwars_ywing_fighterbomber.glb");
 
-	useFrame((state) => {
+	useFrame(() => {
 		if (group.current) {
 			// Move the Y-wing from bottom to top
 			group.current.position.y += FLY_SPEED;

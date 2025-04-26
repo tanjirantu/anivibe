@@ -4,7 +4,6 @@ import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { Articles } from "./Articles";
 import { ThemeProvider } from "../context/ThemeContext";
-import { Chatbot } from "./Chatbot";
 
 export function Scene() {
 	return (
@@ -13,7 +12,6 @@ export function Scene() {
 				<Navbar />
 				<Hero />
 				<Articles />
-				{/* <Chatbot /> */}
 			</div>
 		</ThemeProvider>
 	);

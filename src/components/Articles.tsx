@@ -1,71 +1,69 @@
 "use client";
 
-import { HyperJump } from "./HyperJump";
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
+// import dynamic from "next/dynamic";
 
 // Dynamically import the Canvas component with no SSR
-const Canvas = dynamic(
-	() => import("@react-three/fiber").then((mod) => mod.Canvas),
-	{
-		ssr: false,
-	}
-);
+// const Canvas = dynamic(
+// 	() => import("@react-three/fiber").then((mod) => mod.Canvas),
+// 	{
+// 		ssr: false,
+// 	}
+// );
 
 // Dynamically import the YWingFighter component
-const YWingFighter = dynamic(
-	() => import("./YWingFighter").then((mod) => mod.YWingFighter),
-	{
-		ssr: false,
-	}
-);
+// const YWingFighter = dynamic(
+// 	() => import("./YWingFighter").then((mod) => mod.YWingFighter),
+// 	{
+// 		ssr: false,
+// 	}
+// );
 
 // Dynamically import the OrbitControls component
-const OrbitControls = dynamic(
-	() => import("@react-three/drei").then((mod) => mod.OrbitControls),
-	{
-		ssr: false,
-	}
-);
+// const OrbitControls = dynamic(
+// 	() => import("@react-three/drei").then((mod) => mod.OrbitControls),
+// 	{
+// 		ssr: false,
+// 	}
+// );
 
-interface Article {
-	id: number;
-	title: string;
-	description: string;
-	date: string;
-	tags: string[];
-	image: string;
-}
+// interface Article {
+// 	id: number;
+// 	title: string;
+// 	description: string;
+// 	date: string;
+// 	tags: string[];
+// 	image: string;
+// }
 
-const starWarsArticles: Article[] = [
-	{
-		id: 1,
-		title: "The Art of Lightsaber Combat",
-		description:
-			"Discover the ancient techniques and forms of lightsaber combat practiced by Jedi and Sith throughout the ages.",
-		date: "2024-03-15",
-		tags: ["Jedi", "Combat", "Lightsaber"],
-		image: "https://disneyartonmain.com/cdn/shop/files/HangInThere_StarWars.webp?v=1742947488&width=1500",
-	},
-	{
-		id: 2,
-		title: "The Rise of the Droid Revolution",
-		description:
-			"Explore the evolution of droids in the Star Wars universe, from simple protocol units to advanced battle machines.",
-		date: "2024-03-10",
-		tags: ["Droids", "Technology", "History"],
-		image: "https://disneyartonmain.com/cdn/shop/files/DroidsForSale_StarWars.webp?v=1738888892&width=1500",
-	},
-	{
-		id: 3,
-		title: "Spaceports of the Outer Rim",
-		description:
-			"Journey through the most famous spaceports in the galaxy, from Mos Eisley to Cloud City and beyond.",
-		date: "2024-03-05",
-		tags: ["Spaceports", "Galaxy", "Travel"],
-		image: "https://disneyartonmain.com/cdn/shop/files/SpaceportHangar_SW.webp?v=1738540231&width=1500",
-	},
-];
+// const starWarsArticles: Article[] = [
+// 	{
+// 		id: 1,
+// 		title: "The Art of Lightsaber Combat",
+// 		description:
+// 			"Discover the ancient techniques and forms of lightsaber combat practiced by Jedi and Sith throughout the ages.",
+// 		date: "2024-03-15",
+// 		tags: ["Jedi", "Combat", "Lightsaber"],
+// 		image: "https://disneyartonmain.com/cdn/shop/files/HangInThere_StarWars.webp?v=1742947488&width=1500",
+// 	},
+// 	{
+// 		id: 2,
+// 		title: "The Rise of the Droid Revolution",
+// 		description:
+// 			"Explore the evolution of droids in the Star Wars universe, from simple protocol units to advanced battle machines.",
+// 		date: "2024-03-10",
+// 		tags: ["Droids", "Technology", "History"],
+// 		image: "https://disneyartonmain.com/cdn/shop/files/DroidsForSale_StarWars.webp?v=1738888892&width=1500",
+// 	},
+// 	{
+// 		id: 3,
+// 		title: "Spaceports of the Outer Rim",
+// 		description:
+// 			"Journey through the most famous spaceports in the galaxy, from Mos Eisley to Cloud City and beyond.",
+// 		date: "2024-03-05",
+// 		tags: ["Spaceports", "Galaxy", "Travel"],
+// 		image: "https://disneyartonmain.com/cdn/shop/files/SpaceportHangar_SW.webp?v=1738540231&width=1500",
+// 	},
+// ];
 
 export function Articles() {
 	return (

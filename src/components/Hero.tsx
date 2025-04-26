@@ -1,6 +1,5 @@
 "use client";
 
-import { BB8_2D } from "./BB8_2D";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Starfighter from "./Starfighter";
 import { StarFighter3D } from "./StarFighter3D";
@@ -8,12 +7,10 @@ import { Planet3D } from "./Planet3D";
 import { Saturn3D } from "./Saturn3D";
 import { Neptune3D } from "./Neptune3D";
 import { Juno3D } from "./Juno3D";
-import { BlackHole3D } from "./BlackHole3D";
 import { Sun3D } from "./Sun3D";
 import { AnimatedText } from "./AnimatedText";
 import { ControlPanel } from "./ControlPanel";
-import { XWingCursor } from "./XWingCursor";
-import { YWingCursor } from "./YWingCursor";
+import Image from "next/image";
 
 export function Hero() {
 	const [stars, setStars] = useState<
@@ -26,9 +23,6 @@ export function Hero() {
 			isGlowing: boolean;
 			glowDelay: string;
 		}>
-	>([]);
-	const [shootingStars, setShootingStars] = useState<
-		Array<{ top: string; left: string; delay: string }>
 	>([]);
 	const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 	const [isCursorInHero, setIsCursorInHero] = useState(false);
@@ -75,14 +69,7 @@ export function Hero() {
 			glowDelay: `${Math.random() * 5}s`,
 		}));
 
-		const shootingStarsData = Array.from({ length: 3 }, (_, i) => ({
-			top: `${Math.random() * 50}%`,
-			left: `${Math.random() * 100}%`,
-			delay: `${i * 2}s`,
-		}));
-
 		setStars(starsData);
-		setShootingStars(shootingStarsData);
 
 		window.addEventListener("mousemove", handleMouseMove);
 
@@ -108,7 +95,6 @@ export function Hero() {
 				<Neptune3D scale={planetSize} />
 				<Juno3D scale={planetSize} />
 				<Sun3D scale={planetSize} speed={starfighterSpeed} />
-				{/* <BlackHole3D scale={planetSize} speed={starfighterSpeed} /> */}
 			</div>
 
 			{/* Custom Cursor */}
@@ -181,21 +167,6 @@ export function Hero() {
 					<div className="absolute bottom-[20%] left-[30%] w-[200px] h-[200px] rounded-full bg-teal-500/20 blur-[80px]" />
 				</div>
 
-				{/* Shooting Stars */}
-				{/* <div className="absolute inset-0">
-					{shootingStars.map((star, i) => (
-						<div
-							key={i}
-							className="absolute w-[100px] h-[1px] bg-white transform -rotate-45 animate-shooting-star"
-							style={{
-								top: star.top,
-								left: star.left,
-								animationDelay: star.delay,
-							}}
-						/>
-					))}
-				</div> */}
-
 				{/* Cosmic Dust */}
 				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.3)_70%,_rgba(0,0,0,0.4)_100%)]" />
 
@@ -210,73 +181,91 @@ export function Hero() {
 
 				{/* Floating Alien Ship */}
 				<div className="absolute top-[25%] right-[35%] w-[48px] h-[48px] animate-float-ship">
-					<img
+					<Image
 						src="/assets/alien_ship.png"
 						alt="Alien Ship"
+						width={48}
+						height={48}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 
 				{/* Floating Asteroid */}
 				<div className="absolute top-[60%] left-[30%] w-[32px] h-[32px] animate-float-asteroid">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={32}
+						height={32}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 
 				{/* Asteroid Group 1 */}
 				<div className="absolute top-[40%] left-[15%] w-[24px] h-[24px] animate-float-asteroid-1">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={24}
+						height={24}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 				<div className="absolute top-[45%] left-[18%] w-[20px] h-[20px] animate-float-asteroid-2">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={20}
+						height={20}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 				<div className="absolute top-[38%] left-[20%] w-[28px] h-[28px] animate-float-asteroid-3">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={28}
+						height={28}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 
 				{/* Asteroid Group 2 */}
 				<div className="absolute top-[70%] right-[25%] w-[18px] h-[18px] animate-float-asteroid-4">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={18}
+						height={18}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 				<div className="absolute top-[75%] right-[28%] w-[16px] h-[16px] animate-float-asteroid-5">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={16}
+						height={16}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 				<div className="absolute top-[72%] right-[22%] w-[12px] h-[12px] animate-float-asteroid-6">
-					<img
+					<Image
 						src="/assets/astroid_01.png"
 						alt="Asteroid"
+						width={12}
+						height={12}
 						className="w-full h-full object-contain"
 					/>
 				</div>
 
 				{/* Comet 1 */}
 				<div className="absolute top-0 left-[-40px] w-[40px] h-[40px] animate-comet-1">
-					<img
+					<Image
 						src="/assets/comet_04.png"
 						alt="Comet"
+						width={40}
+						height={40}
 						className="w-full h-full object-contain"
 					/>
 					<div className="absolute inset-0 w-full h-full bg-white/30 blur-[20px] animate-comet-trail-1"></div>
@@ -302,9 +291,11 @@ export function Hero() {
 				</div> */}
 
 				<div className="absolute top-[30%] right-[30%] w-[120px] h-[120px] animate-planet-glow">
-					<img
+					<Image
 						src="/assets/planet_04.png"
 						alt="Planet"
+						width={120}
+						height={120}
 						className="w-full h-full object-contain"
 					/>
 					<div className="absolute inset-0 w-full h-full bg-orange-500/20 blur-[20px] rounded-full"></div>

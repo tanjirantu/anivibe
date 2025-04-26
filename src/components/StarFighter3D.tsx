@@ -21,7 +21,7 @@ function StarFighterModel({ speed = 1 }: StarFighter3DProps) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/tie_fighter_low-poly.glb");
 
-	useFrame((state) => {
+	useFrame(() => {
 		if (group.current) {
 			// Move the starfighter from bottom to top
 			group.current.position.y += FLY_SPEED * speed;

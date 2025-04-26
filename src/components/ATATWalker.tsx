@@ -33,7 +33,7 @@ export function ATATWalker() {
 		});
 	}, [scene]);
 
-	useFrame((state, delta) => {
+	useFrame((state) => {
 		if (group.current) {
 			// Move the AT-AT from right to left
 			group.current.position.x -= WALK_SPEED;

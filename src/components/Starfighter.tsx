@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface StarfighterProps {
 	x?: number;
@@ -27,9 +28,11 @@ const Starfighter: React.FC<StarfighterProps> = ({
 	};
 
 	return (
-		<img
+		<Image
 			src="/assets/starwars_starfighter.png"
 			alt="Starfighter"
+			width={128}
+			height={128}
 			style={style}
 		/>
 	);
