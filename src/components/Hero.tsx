@@ -33,7 +33,7 @@ function CameraZoomIn() {
 
 // Cockpit view component
 function XWingCockpitView() {
-	const { scene } = useGLTF("/assets/x_wing_cockpit.glb");
+	const { scene } = useGLTF("/assets/a_wing_cockpit.glb");
 	return (
 		<div className="absolute inset-0 w-full h-full z-20">
 			<Canvas
@@ -134,8 +134,8 @@ export function Hero() {
 			ref={heroRef}
 			className="relative h-[calc(100vh-32rem)] overflow-hidden cursor-none"
 		>
-			{/* Immersive Starfield Canvas (hide during zooming, show in cockpit) */}
-			{!isCockpit && <StarfieldCanvas starSpeed={starSpeed} />}
+			{/* Immersive Starfield Canvas (always rendered as background) */}
+			<StarfieldCanvas starSpeed={starSpeed} />
 
 			{/* Cockpit View */}
 			{isCockpit ? (
