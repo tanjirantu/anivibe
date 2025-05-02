@@ -9,10 +9,12 @@ interface ControlPanelProps {
 	onStarfighterSpeedChange: (value: number) => void;
 	planetSize: number;
 	onPlanetSizeChange: (value: number) => void;
-	spaceColor: string;
-	onSpaceColorChange: (value: string) => void;
+	// spaceColor: string;
+	// onSpaceColorChange: (value: string) => void;
 	onHyperspeedJump?: () => void;
 	onCockpitView?: () => void;
+	/** Optional reset handler */
+	onReset?: () => void;
 }
 
 export function ControlPanel({
@@ -22,10 +24,11 @@ export function ControlPanel({
 	onStarfighterSpeedChange,
 	planetSize,
 	onPlanetSizeChange,
-	spaceColor,
-	onSpaceColorChange,
+	// spaceColor,
+	// onSpaceColorChange,
 	onHyperspeedJump,
 	onCockpitView,
+	onReset,
 }: ControlPanelProps) {
 	const [isMounted, setIsMounted] = useState(false);
 
@@ -99,6 +102,7 @@ export function ControlPanel({
 				</div>
 
 				{/* Space Color Control */}
+				{/*
 				<div>
 					<label className="text-white text-sm block mb-2">
 						Space Color Tone
@@ -110,6 +114,7 @@ export function ControlPanel({
 						className="w-full h-8 rounded cursor-pointer"
 					/>
 				</div>
+				*/}
 			</div>
 
 			{/* Hyperspeed Button */}
@@ -128,6 +133,15 @@ export function ControlPanel({
 				className="mt-4 w-full px-4 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg border-2 border-green-400 hover:bg-green-500 transition-all text-lg tracking-wider focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				🛩️ Cockpit
+			</button>
+
+			{/* Reset Button */}
+			<button
+				onClick={onReset}
+				disabled={!onReset}
+				className="mt-4 w-full px-4 py-3 bg-gray-700 text-white font-bold rounded-lg shadow-lg border-2 border-gray-400 hover:bg-gray-600 transition-all text-lg tracking-wider focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+			>
+				Reset
 			</button>
 		</div>
 	);

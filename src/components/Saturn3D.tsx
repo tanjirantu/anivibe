@@ -37,7 +37,7 @@ function SaturnModel({
 			group.current.position.x = 0 - 12 * (1 - hyperjumpProgress); // Move from outward to initial
 			group.current.position.z = 0 - 18 * (1 - hyperjumpProgress); // Move from outward to initial
 			// Move Saturn out of the screen as the animation ends
-			group.current.position.x = 0 - 12 * hyperjumpProgress;
+			group.current.position.x = 0 - 24 * hyperjumpProgress;
 			group.current.position.z = 0 - 10 * hyperjumpProgress;
 		}
 	});

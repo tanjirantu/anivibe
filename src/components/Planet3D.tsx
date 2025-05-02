@@ -6,7 +6,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
-const SCALE = 0.0008;
+const SCALE = 0.005;
 
 interface Planet3DProps {
 	scale?: number;
@@ -19,8 +19,8 @@ function JupiterModel({ scale = 1, hyperjumpProgress = 0 }: Planet3DProps) {
 	const { scene } = useGLTF("/models/earth_nasa.glb");
 
 	// Initial positions
-	const initialX = 10;
-	const initialZ = -5;
+	const initialX = 0;
+	const initialZ = -10;
 
 	useFrame((state, delta) => {
 		if (group.current) {
@@ -28,7 +28,7 @@ function JupiterModel({ scale = 1, hyperjumpProgress = 0 }: Planet3DProps) {
 			group.current.rotation.y += delta * 0.2;
 			// Move outward during hyperjump
 			group.current.position.x = initialX + 20 * (1 - hyperjumpProgress); // Move from outward to initial
-			group.current.position.z = initialZ - 40 * (1 - hyperjumpProgress); // Move from outward to initial
+			group.current.position.z = initialZ - 70 * (1 - hyperjumpProgress); // Move from outward to initial
 		}
 	});
 

@@ -61,7 +61,6 @@ export function Hero() {
 	const [dustSpeed, setDustSpeed] = useState(1);
 	const [starfighterSpeed, setStarfighterSpeed] = useState(1);
 	const [planetSize, setPlanetSize] = useState(1);
-	const [spaceColor, setSpaceColor] = useState("#161B33");
 
 	// Cockpit and starfield speed state
 	const [isCockpit, setIsCockpit] = useState(false);
@@ -98,6 +97,13 @@ export function Hero() {
 			}
 		}
 		requestAnimationFrame(animate);
+	};
+
+	// Reset handler for ControlPanel
+	const handleReset = () => {
+		setHyperjumping(false);
+		setHyperjumpProgress(0);
+		setStarSpeed(0.0035);
 	};
 
 	const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -210,7 +216,6 @@ export function Hero() {
 						<div
 							className="absolute inset-0 bg-gradient-to-b from-[#090921] via-[#161B33] to-[#0F1644]"
 							style={{
-								backgroundColor: spaceColor,
 								transition: "background-color 0.3s ease",
 							}}
 						/>
@@ -385,7 +390,7 @@ export function Hero() {
 							<div className="absolute inset-0 w-full h-full bg-purple-500/20 blur-[30px] rounded-full"></div>
 						</div> */}
 
-						<div className="absolute top-[30%] right-[30%] w-[120px] h-[120px] animate-planet-glow">
+						{/* <div className="absolute top-[30%] right-[30%] w-[120px] h-[120px] animate-planet-glow">
 							<Image
 								src="/assets/planet_04.png"
 								alt="Planet"
@@ -394,7 +399,7 @@ export function Hero() {
 								className="w-full h-full object-contain"
 							/>
 							<div className="absolute inset-0 w-full h-full bg-orange-500/20 blur-[20px] rounded-full"></div>
-						</div>
+						</div> */}
 
 						{/* <div className="absolute top-[70%] left-[25%] w-[90px] h-[90px] animate-planet-glow">
 							<img
@@ -452,10 +457,9 @@ export function Hero() {
 						onStarfighterSpeedChange={setStarfighterSpeed}
 						planetSize={planetSize}
 						onPlanetSizeChange={setPlanetSize}
-						spaceColor={spaceColor}
-						onSpaceColorChange={setSpaceColor}
 						onHyperspeedJump={handleHyperjump}
 						onCockpitView={handleCockpitView}
+						onReset={handleReset}
 					/>
 				</>
 			)}
