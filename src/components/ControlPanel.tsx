@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { FaRocket, FaUserAstronaut, FaRedo } from "react-icons/fa";
 
 interface ControlPanelProps {
 	dustSpeed: number;
@@ -31,13 +32,49 @@ export function ControlPanel({
 	onReset,
 }: ControlPanelProps) {
 	const [isMounted, setIsMounted] = useState(false);
+	const [isMobile, setIsMobile] = useState(false);
 
 	useEffect(() => {
 		setIsMounted(true);
+		const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
 	}, []);
 
 	if (!isMounted) {
 		return null;
+	}
+
+	if (isMobile) {
+		return (
+			<div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-6 bg-black/70 px-6 py-3 rounded-full shadow-lg border border-white/20 backdrop-blur-sm">
+				<button
+					onClick={onHyperspeedJump}
+					disabled={!onHyperspeedJump}
+					className="text-blue-400 bg-blue-900/80 rounded-full p-2 text-2xl flex items-center justify-center shadow-md border-2 border-blue-400 hover:bg-blue-700/80 transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed animate-pulse"
+					aria-label="Hyperjump"
+				>
+					<FaRocket />
+				</button>
+				<button
+					onClick={onCockpitView}
+					disabled={!onCockpitView}
+					className="text-green-400 bg-green-900/80 rounded-full p-2 text-2xl flex items-center justify-center shadow-md border-2 border-green-400 hover:bg-green-700/80 transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+					aria-label="Cockpit View"
+				>
+					<FaUserAstronaut />
+				</button>
+				<button
+					onClick={onReset}
+					disabled={!onReset}
+					className="text-gray-300 bg-gray-800/80 rounded-full p-2 text-2xl flex items-center justify-center shadow-md border-2 border-gray-400 hover:bg-gray-700/80 transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+					aria-label="Reset"
+				>
+					<FaRedo />
+				</button>
+			</div>
+		);
 	}
 
 	return (
