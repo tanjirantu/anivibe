@@ -5,10 +5,7 @@ import Starfighter from "./Starfighter";
 import { StarFighter3D } from "./StarFighter3D";
 import { Planet3D } from "./Planet3D";
 import { Saturn3D } from "./Saturn3D";
-import { Neptune3D } from "./Neptune3D";
 import { Juno3D } from "./Juno3D";
-import { Sun3D } from "./Sun3D";
-// import { AnimatedText } from "./AnimatedText";
 import { ControlPanel } from "./ControlPanel";
 import Image from "next/image";
 import { StarfieldCanvas } from "./StarfieldCanvas";
@@ -70,30 +67,37 @@ export function Hero() {
 	const [isCockpit, setIsCockpit] = useState(false);
 	const [starSpeed, setStarSpeed] = useState(0.0035);
 
-	// Hyperspeed jump handler
-	const handleHyperspeedJump = () => {
-		setIsCockpit(true); // Show cockpit immediately
-		setDustSpeed(5);
-		setStarfighterSpeed(2);
-		// Start starfield animation after cockpit loads (e.g., 300ms delay)
-		setTimeout(() => {
-			let current = 0.0035;
-			const target = 0.02;
-			const steps = 40;
-			const interval = 60; // ms
-			let count = 0;
-			function animateStarSpeed() {
-				current = current + (target - current) / (steps - count);
-				setStarSpeed(current);
-				count++;
-				if (count < steps) {
-					setTimeout(animateStarSpeed, interval);
-				} else {
-					setStarSpeed(target);
-				}
+	// Hyperjump animation state
+	const [hyperjumping, setHyperjumping] = useState(false);
+	const [hyperjumpProgress, setHyperjumpProgress] = useState(0); // 0 to 1
+
+	// Environment state: 'space' or 'desert'
+	// const [environment, setEnvironment] = useState<"space" | "desert">("space");
+
+	// Cockpit view handler (used for both Hyperjump and Cockpit buttons)
+	const handleCockpitView = () => {
+		setIsCockpit(true);
+	};
+
+	// New Hyperjump animation handler
+	const handleHyperjump = () => {
+		setHyperjumping(true);
+		setIsCockpit(false);
+		let progress = 0;
+		const duration = 1800; // ms
+		const start = performance.now();
+		function animate(now: DOMHighResTimeStamp) {
+			progress = Math.min((now - start) / duration, 1);
+			setHyperjumpProgress(progress);
+			// Animate starSpeed from 0.0035 to 0.02
+			setStarSpeed(0.0035 + (0.02 - 0.0035) * progress);
+			if (progress < 1) {
+				requestAnimationFrame(animate);
+			} else {
+				setHyperjumping(false); // Animation ends, keep close view
 			}
-			animateStarSpeed();
-		}, 300);
+		}
+		requestAnimationFrame(animate);
 	};
 
 	const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -134,8 +138,21 @@ export function Hero() {
 			ref={heroRef}
 			className="relative h-screen w-screen overflow-hidden cursor-none"
 		>
+			{/* Exit Cockpit View Button */}
+			{isCockpit && (
+				<button
+					onClick={() => setIsCockpit(false)}
+					className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-2 bg-black/80 text-yellow-300 font-bold rounded-lg border-2 border-yellow-400 shadow-lg hover:bg-yellow-700/80 transition-colors"
+				>
+					Exit Cockpit View
+				</button>
+			)}
+
 			{/* Immersive Starfield Canvas (always rendered as background) */}
-			<StarfieldCanvas starSpeed={starSpeed} />
+			<StarfieldCanvas
+				starSpeed={starSpeed}
+				shake={hyperjumping ? hyperjumpProgress : 0}
+			/>
 
 			{/* Cockpit View */}
 			{isCockpit ? (
@@ -144,12 +161,32 @@ export function Hero() {
 				<>
 					{/* 3D Models */}
 					<div className="absolute inset-0 w-full h-full z-10">
-						<Planet3D scale={planetSize} />
-						<Saturn3D speed={starfighterSpeed} scale={planetSize} />
-						<StarFighter3D speed={starfighterSpeed} />
-						<Neptune3D scale={planetSize} />
-						<Juno3D scale={planetSize} />
-						<Sun3D scale={planetSize} speed={starfighterSpeed} />
+						<Planet3D
+							scale={planetSize}
+							hyperjumping={hyperjumping}
+							hyperjumpProgress={hyperjumpProgress}
+						/>
+						<Saturn3D
+							speed={starfighterSpeed}
+							scale={planetSize}
+							hyperjumping={hyperjumping}
+							hyperjumpProgress={hyperjumpProgress}
+						/>
+						<StarFighter3D
+							speed={starfighterSpeed}
+							hyperjumping={hyperjumping}
+							hyperjumpProgress={hyperjumpProgress}
+						/>
+						{/* <Neptune3D scale={planetSize} /> */}
+						<Juno3D
+							scale={planetSize}
+							hyperjumping={hyperjumping}
+							hyperjumpProgress={hyperjumpProgress}
+						/>
+						{/* <Sun3D
+							scale={planetSize}
+							speed={starfighterSpeed}
+						/> */}
 					</div>
 
 					{/* Custom Cursor */}
@@ -417,7 +454,8 @@ export function Hero() {
 						onPlanetSizeChange={setPlanetSize}
 						spaceColor={spaceColor}
 						onSpaceColorChange={setSpaceColor}
-						onHyperspeedJump={handleHyperspeedJump}
+						onHyperspeedJump={handleHyperjump}
+						onCockpitView={handleCockpitView}
 					/>
 				</>
 			)}

@@ -9,18 +9,36 @@ import * as THREE from "three";
 interface Saturn3DProps {
 	speed?: number;
 	scale?: number;
+	hyperjumping?: boolean;
+	hyperjumpProgress?: number;
 }
 
 const SCALE = 0.006;
 
-function SaturnModel({ speed = 1 }: { speed?: number }) {
+function SaturnModel({
+	speed = 1,
+	hyperjumpProgress = 0,
+}: {
+	speed?: number;
+	hyperjumpProgress?: number;
+}) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/saturn_v1.1.glb");
+
+	// Initial positions
+	// const initialX = -12;
+	// const initialZ = 0;
 
 	useFrame((state, delta) => {
 		if (group.current) {
 			// Rotate the planet
 			group.current.rotation.y += delta * speed * 0.2;
+			// Move outward during hyperjump (reversed)
+			group.current.position.x = 0 - 12 * (1 - hyperjumpProgress); // Move from outward to initial
+			group.current.position.z = 0 - 18 * (1 - hyperjumpProgress); // Move from outward to initial
+			// Move Saturn out of the screen as the animation ends
+			group.current.position.x = 0 - 12 * hyperjumpProgress;
+			group.current.position.z = 0 - 10 * hyperjumpProgress;
 		}
 	});
 
@@ -35,7 +53,12 @@ function SaturnModel({ speed = 1 }: { speed?: number }) {
 	);
 }
 
-export function Saturn3D({ speed = 1, scale = 1 }: Saturn3DProps) {
+export function Saturn3D({
+	speed = 1,
+	scale = 1,
+	// hyperjumping = false,
+	hyperjumpProgress = 0,
+}: Saturn3DProps) {
 	return (
 		<div
 			className="absolute top-[30%] right-[15%] w-full h-full"
@@ -64,7 +87,10 @@ export function Saturn3D({ speed = 1, scale = 1 }: Saturn3DProps) {
 				/>
 
 				{/* Saturn model */}
-				<SaturnModel speed={speed} />
+				<SaturnModel
+					speed={speed}
+					hyperjumpProgress={hyperjumpProgress}
+				/>
 
 				{/* Disable orbit controls for static display */}
 				<OrbitControls

@@ -1,14 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface HyperJumpProps {
 	children: React.ReactNode;
 	duration?: number;
 }
 
+interface StarData {
+	left: number;
+	top: number;
+	z: number;
+	delay: number;
+}
+
+interface StreakData {
+	left: number;
+	z: number;
+	delay: number;
+}
+
 export function HyperJump({ children, duration = 2000 }: HyperJumpProps) {
 	const [isJumping, setIsJumping] = useState(false);
+
+	// Store random star and streak data in state to avoid hydration errors
+	const [starData, setStarData] = useState<StarData[]>([]);
+	const [streakData, setStreakData] = useState<StreakData[]>([]);
+
+	useEffect(() => {
+		setStarData(
+			Array.from({ length: 200 }).map(() => ({
+				left: Math.random() * 100,
+				top: Math.random() * 100,
+				z: Math.random() * 2000,
+				delay: Math.random() * 100,
+			}))
+		);
+		setStreakData(
+			Array.from({ length: 30 }).map(() => ({
+				left: Math.random() * 100,
+				z: Math.random() * 2000,
+				delay: Math.random() * 100,
+			}))
+		);
+	}, [isJumping]);
 
 	const startJump = () => {
 		setIsJumping(true);
@@ -21,35 +56,31 @@ export function HyperJump({ children, duration = 2000 }: HyperJumpProps) {
 				<div className="fixed inset-0 z-50 pointer-events-none perspective-1000">
 					{/* Stars */}
 					<div className="absolute inset-0 bg-black overflow-hidden">
-						{Array.from({ length: 200 }).map((_, i) => (
+						{starData.map((star, i) => (
 							<div
 								key={i}
 								className="absolute w-1 h-1 bg-white rounded-full"
 								style={{
-									left: `${Math.random() * 100}%`,
-									top: `${Math.random() * 100}%`,
-									transform: `translateZ(${
-										Math.random() * 2000
-									}px)`,
+									left: `${star.left}%`,
+									top: `${star.top}%`,
+									transform: `translateZ(${star.z}px)`,
 									animation: `hyperspace ${duration}ms linear forwards`,
-									animationDelay: `${Math.random() * 100}ms`,
+									animationDelay: `${star.delay}ms`,
 								}}
 							/>
 						))}
 					</div>
 					{/* Light streaks */}
 					<div className="absolute inset-0 overflow-hidden">
-						{Array.from({ length: 30 }).map((_, i) => (
+						{streakData.map((streak, i) => (
 							<div
 								key={i}
 								className="absolute h-full w-1 bg-blue-400/50"
 								style={{
-									left: `${Math.random() * 100}%`,
-									transform: `translateZ(${
-										Math.random() * 2000
-									}px)`,
+									left: `${streak.left}%`,
+									transform: `translateZ(${streak.z}px)`,
 									animation: `hyperspaceStreak ${duration}ms linear forwards`,
-									animationDelay: `${Math.random() * 100}ms`,
+									animationDelay: `${streak.delay}ms`,
 								}}
 							/>
 						))}

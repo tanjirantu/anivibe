@@ -12,6 +12,7 @@ interface ControlPanelProps {
 	spaceColor: string;
 	onSpaceColorChange: (value: string) => void;
 	onHyperspeedJump?: () => void;
+	onCockpitView?: () => void;
 }
 
 export function ControlPanel({
@@ -24,6 +25,7 @@ export function ControlPanel({
 	spaceColor,
 	onSpaceColorChange,
 	onHyperspeedJump,
+	onCockpitView,
 }: ControlPanelProps) {
 	const [isMounted, setIsMounted] = useState(false);
 
@@ -117,6 +119,15 @@ export function ControlPanel({
 				className="mt-6 w-full px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg border-2 border-blue-400 hover:bg-blue-500 transition-all text-lg tracking-wider animate-pulse focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				🚀 Hyperjump
+			</button>
+
+			{/* Cockpit View Button */}
+			<button
+				onClick={onCockpitView}
+				disabled={!onCockpitView}
+				className="mt-4 w-full px-4 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg border-2 border-green-400 hover:bg-green-500 transition-all text-lg tracking-wider focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+			>
+				🛩️ Cockpit
 			</button>
 		</div>
 	);

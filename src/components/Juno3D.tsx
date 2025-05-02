@@ -10,19 +10,41 @@ const SCALE = 0.02;
 
 interface Juno3DProps {
 	scale?: number;
+	hyperjumping?: boolean;
+	hyperjumpProgress?: number;
+	speed?: number;
 }
 
-function JunoModel({ scale = 1 }: Juno3DProps) {
+function JunoModel({
+	scale = 1,
+	hyperjumpProgress = 0,
+	speed = 1,
+}: Juno3DProps) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/juno.glb");
 
+	// Initial positions
+	// const initialX = 8;
+	// const initialZ = 0;
+
 	useFrame((state, delta) => {
 		if (group.current) {
-			// Rotate the satellite
-			group.current.rotation.y += delta * 0.3;
-			// Add a slight floating motion
-			group.current.position.y =
-				Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+			// // Rotate the satellite
+			// group.current.rotation.y += delta * 0.3;
+			// // Add a slight floating motion
+			// group.current.position.y =
+			// 	Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+			// // Move outward during hyperjump (reversed)
+			// group.current.position.x = 0 + 8 * (1 - hyperjumpProgress); // Move from outward to initial
+			// group.current.position.z = 2 - 100 * (1 - hyperjumpProgress); // Move from outward to initial
+			// Rotate the planet
+			group.current.rotation.y += delta * speed * 0.3;
+			// Move outward during hyperjump (reversed)
+			group.current.position.x = 0 + 8 * (1 - hyperjumpProgress); // Move from outward to initial
+			group.current.position.z = 0 - 15 * (1 - hyperjumpProgress); // Move from outward to initial
+			// Move Saturn out of the screen as the animation ends
+			group.current.position.x = 5 - 10 * hyperjumpProgress;
+			group.current.position.z = 0 - 10 * hyperjumpProgress;
 		}
 	});
 
@@ -37,7 +59,11 @@ function JunoModel({ scale = 1 }: Juno3DProps) {
 	);
 }
 
-export function Juno3D({ scale = 1 }: Juno3DProps) {
+export function Juno3D({
+	scale = 1,
+	// hyperjumping = false,
+	hyperjumpProgress = 0,
+}: Juno3DProps) {
 	return (
 		<div
 			className="absolute top-[-30%] right-[27%] w-full h-full"
@@ -66,7 +92,10 @@ export function Juno3D({ scale = 1 }: Juno3DProps) {
 				/>
 
 				{/* Juno model */}
-				<JunoModel />
+				<JunoModel
+					scale={scale}
+					hyperjumpProgress={hyperjumpProgress}
+				/>
 
 				{/* Disable orbit controls for static display */}
 				<OrbitControls

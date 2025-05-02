@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 
 interface StarfieldCanvasProps {
 	starSpeed?: number;
+	shake?: number; // 0 (no shake) to 1 (max shake)
 }
 
 interface Star {
@@ -12,7 +13,7 @@ interface Star {
 	prevY: number;
 }
 
-const STAR_COUNT = 600;
+const STAR_COUNT = 250;
 const DEFAULT_STAR_SPEED = 0.0035;
 const STAR_SIZE = 1.5;
 const STAR_COLOR = "rgba(255,255,255,0.85)";
@@ -30,6 +31,7 @@ function randomStar(width: number, height: number): Star {
 
 export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
 	starSpeed = DEFAULT_STAR_SPEED,
+	shake = 0,
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -71,6 +73,12 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
 			ctx.clearRect(0, 0, width, height);
 			ctx.save();
 			ctx.translate(width / 2, height / 2);
+			// Add shake effect
+			if (shake > 0) {
+				const shakeX = (Math.random() - 0.5) * 20 * shake;
+				const shakeY = (Math.random() - 0.5) * 20 * shake;
+				ctx.translate(shakeX, shakeY);
+			}
 			for (const star of starsRef.current) {
 				// Save previous projected position
 				star.prevX = (star.x / star.z) * width * 0.5;
@@ -104,7 +112,7 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
 			if (animationRef.current)
 				cancelAnimationFrame(animationRef.current);
 		};
-	}, [starSpeed]);
+	}, [starSpeed, shake]);
 
 	return (
 		<canvas
