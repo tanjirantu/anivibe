@@ -9,7 +9,7 @@ import { Juno3D } from "./Juno3D";
 import { ControlPanel } from "./ControlPanel";
 import Image from "next/image";
 import { StarfieldCanvas } from "./StarfieldCanvas";
-import { useGLTF, Html, useProgress } from "@react-three/drei";
+import { useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 
 // Cockpit view camera zoom-in animation
