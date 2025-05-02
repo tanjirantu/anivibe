@@ -11,6 +11,7 @@ interface ControlPanelProps {
 	onPlanetSizeChange: (value: number) => void;
 	spaceColor: string;
 	onSpaceColorChange: (value: string) => void;
+	onHyperspeedJump?: () => void;
 }
 
 export function ControlPanel({
@@ -22,6 +23,7 @@ export function ControlPanel({
 	onPlanetSizeChange,
 	spaceColor,
 	onSpaceColorChange,
+	onHyperspeedJump,
 }: ControlPanelProps) {
 	const [isMounted, setIsMounted] = useState(false);
 
@@ -107,6 +109,15 @@ export function ControlPanel({
 					/>
 				</div>
 			</div>
+
+			{/* Hyperspeed Button */}
+			<button
+				onClick={onHyperspeedJump}
+				disabled={!onHyperspeedJump}
+				className="mt-6 w-full px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg border-2 border-blue-400 hover:bg-blue-500 transition-all text-lg tracking-wider animate-pulse focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+			>
+				🚀 Hyperjump
+			</button>
 		</div>
 	);
 }
