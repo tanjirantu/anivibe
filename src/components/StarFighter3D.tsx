@@ -18,7 +18,7 @@ interface StarFighter3DProps {
 	zooming?: boolean;
 }
 
-function StarFighterModel({ speed = 1, zooming = false }: StarFighter3DProps) {
+function StarFighterModel({ speed = 1 }: StarFighter3DProps) {
 	const group = useRef<THREE.Group>(null);
 	const { scene } = useGLTF("/models/mandalorian_n1.glb");
 
@@ -145,7 +145,7 @@ export function StarFighter3D({
 				/>
 
 				{/* Starfighter model */}
-				<StarFighterModel speed={speed} zooming={zooming} />
+				<StarFighterModel speed={speed} />
 
 				{/* Disable orbit controls for the flying animation */}
 				<OrbitControls

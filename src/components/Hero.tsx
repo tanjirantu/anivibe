@@ -8,7 +8,7 @@ import { Saturn3D } from "./Saturn3D";
 import { Neptune3D } from "./Neptune3D";
 import { Juno3D } from "./Juno3D";
 import { Sun3D } from "./Sun3D";
-import { AnimatedText } from "./AnimatedText";
+// import { AnimatedText } from "./AnimatedText";
 import { ControlPanel } from "./ControlPanel";
 import Image from "next/image";
 import { StarfieldCanvas } from "./StarfieldCanvas";
@@ -54,17 +54,6 @@ function XWingCockpitView() {
 }
 
 export function Hero() {
-	const [stars, setStars] = useState<
-		Array<{
-			top: string;
-			left: string;
-			opacity: number;
-			delay: string;
-			speed: number;
-			isGlowing: boolean;
-			glowDelay: string;
-		}>
-	>([]);
 	const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 	const [isCursorInHero, setIsCursorInHero] = useState(false);
 	const [isCursorInNavbar, setIsCursorInNavbar] = useState(false);
@@ -80,7 +69,6 @@ export function Hero() {
 	// Cockpit and starfield speed state
 	const [isCockpit, setIsCockpit] = useState(false);
 	const [starSpeed, setStarSpeed] = useState(0.0035);
-	const [zooming, setZooming] = useState(false);
 
 	// Hyperspeed jump handler
 	const handleHyperspeedJump = () => {
@@ -130,25 +118,12 @@ export function Hero() {
 	useEffect(() => {
 		setIsMounted(true);
 
-		// Generate stars data
-		const starsData = Array.from({ length: 200 }, () => ({
-			top: `${Math.random() * 100}%`,
-			left: `${Math.random() * 100}%`,
-			opacity: Math.random() * 0.9 + 0.1,
-			delay: `${Math.random() * 3}s`,
-			speed: (Math.random() * 2 + 1) * dustSpeed,
-			isGlowing: Math.random() < 0.2,
-			glowDelay: `${Math.random() * 5}s`,
-		}));
-
-		setStars(starsData);
-
 		window.addEventListener("mousemove", handleMouseMove);
 
 		return () => {
 			window.removeEventListener("mousemove", handleMouseMove);
 		};
-	}, [handleMouseMove, dustSpeed]);
+	}, [handleMouseMove]);
 
 	if (!isMounted) {
 		return null;
@@ -160,9 +135,7 @@ export function Hero() {
 			className="relative h-[calc(100vh-32rem)] overflow-hidden cursor-none"
 		>
 			{/* Immersive Starfield Canvas (hide during zooming, show in cockpit) */}
-			{(!zooming || isCockpit) && (
-				<StarfieldCanvas starSpeed={starSpeed} />
-			)}
+			{!isCockpit && <StarfieldCanvas starSpeed={starSpeed} />}
 
 			{/* Cockpit View */}
 			{isCockpit ? (
@@ -173,10 +146,7 @@ export function Hero() {
 					<div className="absolute inset-0 w-full h-full z-10">
 						<Planet3D scale={planetSize} />
 						<Saturn3D speed={starfighterSpeed} scale={planetSize} />
-						<StarFighter3D
-							speed={starfighterSpeed}
-							zooming={zooming}
-						/>
+						<StarFighter3D speed={starfighterSpeed} />
 						<Neptune3D scale={planetSize} />
 						<Juno3D scale={planetSize} />
 						<Sun3D scale={planetSize} speed={starfighterSpeed} />

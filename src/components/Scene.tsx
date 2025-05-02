@@ -1,8 +1,6 @@
 "use client";
 
-import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
-import { Articles } from "./Articles";
 import { ThemeProvider } from "../context/ThemeContext";
 
 export function Scene() {

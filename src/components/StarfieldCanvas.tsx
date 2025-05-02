@@ -32,7 +32,8 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
 	starSpeed = DEFAULT_STAR_SPEED,
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const animationRef = useRef<number>();
+
+	const animationRef = useRef<number | undefined>(undefined);
 	const starsRef = useRef<Star[]>([]);
 	const sizeRef = useRef({ width: 0, height: 0 });
 
@@ -70,7 +71,7 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
 			ctx.clearRect(0, 0, width, height);
 			ctx.save();
 			ctx.translate(width / 2, height / 2);
-			for (let star of starsRef.current) {
+			for (const star of starsRef.current) {
 				// Save previous projected position
 				star.prevX = (star.x / star.z) * width * 0.5;
 				star.prevY = (star.y / star.z) * width * 0.5;
