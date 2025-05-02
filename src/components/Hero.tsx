@@ -132,7 +132,7 @@ export function Hero() {
 	return (
 		<section
 			ref={heroRef}
-			className="relative h-[calc(100vh-32rem)] overflow-hidden cursor-none"
+			className="relative h-screen w-screen overflow-hidden cursor-none"
 		>
 			{/* Immersive Starfield Canvas (always rendered as background) */}
 			<StarfieldCanvas starSpeed={starSpeed} />
@@ -370,7 +370,7 @@ export function Hero() {
 					</div>
 
 					{/* Content */}
-					<div className="h-full relative z-10 grid lg:grid-cols-2 gap-8 container mx-auto px-4">
+					<div className="h-full w-full relative z-10 grid lg:grid-cols-2 gap-8">
 						{/* Left Column - Text */}
 						{/* <div className="flex flex-col justify-center space-y-6">
 							<div className="relative">
