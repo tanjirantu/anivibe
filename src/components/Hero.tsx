@@ -9,7 +9,7 @@ import { Juno3D } from "./Juno3D";
 import { ControlPanel } from "./ControlPanel";
 import Image from "next/image";
 import { StarfieldCanvas } from "./StarfieldCanvas";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Html, useProgress } from "@react-three/drei";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 
 // Cockpit view camera zoom-in animation
@@ -46,6 +46,41 @@ function XWingCockpitView() {
 				/>
 				<primitive object={scene} />
 			</Canvas>
+		</div>
+	);
+}
+
+// Global Loader overlay component
+function GlobalLoaderOverlay() {
+	const { active, progress } = useProgress();
+	if (!active) return null;
+	return (
+		<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
+			<div className="flex flex-col items-center gap-4">
+				<svg
+					className="animate-spin h-12 w-12 text-yellow-300"
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<circle
+						className="opacity-25"
+						cx="12"
+						cy="12"
+						r="10"
+						stroke="currentColor"
+						strokeWidth="4"
+					/>
+					<path
+						className="opacity-75"
+						fill="currentColor"
+						d="M4 12a8 8 0 018-8v8z"
+					/>
+				</svg>
+				<div className="text-yellow-300 text-2xl font-bold">
+					Loading... {progress.toFixed(0)}%
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -144,6 +179,8 @@ export function Hero() {
 			ref={heroRef}
 			className="relative h-screen w-screen overflow-hidden cursor-none"
 		>
+			<GlobalLoaderOverlay />
+
 			{/* Exit Cockpit View Button */}
 			{isCockpit && (
 				<button
