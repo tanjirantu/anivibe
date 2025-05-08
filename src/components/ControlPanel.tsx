@@ -16,6 +16,8 @@ interface ControlPanelProps {
 	onCockpitView?: () => void;
 	/** Optional reset handler */
 	onReset?: () => void;
+	galaxyName?: string;
+	onNextGalaxy?: () => void;
 }
 
 export function ControlPanel({
@@ -30,6 +32,8 @@ export function ControlPanel({
 	onHyperspeedJump,
 	onCockpitView,
 	onReset,
+	galaxyName,
+	onNextGalaxy,
 }: ControlPanelProps) {
 	const [isMounted, setIsMounted] = useState(false);
 	const [isMobile, setIsMobile] = useState(false);
@@ -152,6 +156,21 @@ export function ControlPanel({
 					/>
 				</div>
 				*/}
+
+				{/* Galaxy Background Switcher */}
+				{galaxyName && onNextGalaxy && (
+					<div className="mb-4">
+						<label className="text-white text-sm block mb-2">
+							Sky Background
+						</label>
+						<button
+							onClick={onNextGalaxy}
+							className="w-full px-4 py-2 bg-indigo-900 text-indigo-200 font-bold rounded-lg border-2 border-indigo-400 hover:bg-indigo-800 transition-colors shadow"
+						>
+							{galaxyName} <span className="ml-2">🔄</span>
+						</button>
+					</div>
+				)}
 			</div>
 
 			{/* Hyperspeed Button */}

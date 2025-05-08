@@ -1,4 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 3D Portfolio Website
+
+This is a space-themed 3D portfolio website built with React, Next.js, and Three.js.
+
+### Recent Updates
+
+#### Space Components
+- **Enhanced StarFighter**:
+  - Changed model from "mandalorian_n1.glb" to "starwars_spaceship.glb"
+  - Implemented wave-like flight path with turbulence effects
+  - Added rotation adjustments to face the opposite direction
+  - Improved banking and pitching based on movement
+  - Adjusted scale and animation parameters for better visual appeal
+
+- **BlackHole Component**:
+  - Added a BlackHole3D component to the Hero section
+  - Positioned in the background for visual depth
+  - Features subtle animation effects like rotation and pulsing
+
+#### Technical Improvements
+- All 3D components include "use client" directives for proper Next.js server-side rendering
+- Components safely handle window references in useEffect hooks
+- The layout includes suppressHydrationWarning to prevent common SSR hydration errors
+- Enhanced animation parameters for more dynamic space environment
+
+### Running the Project
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Getting Started
 

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Starfighter from "./Starfighter";
 import { StarFighter3D } from "./StarFighter3D";
 import { Planet3D } from "./Planet3D";
 import { Saturn3D } from "./Saturn3D";
@@ -11,9 +10,17 @@ import Image from "next/image";
 import { StarfieldCanvas } from "./StarfieldCanvas";
 import { useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import BlackHole3D from "./BlackHole3D";
+import StarFighter from "./StarFighter";
 
-// Cockpit view camera zoom-in animation
-function CameraZoomIn() {
+// Camera component for cockpit POV with cursor-based movement
+function CameraCockpitPOV({
+	cursorX,
+	cursorY,
+}: {
+	cursorX: number;
+	cursorY: number;
+}) {
 	const { camera, clock } = useThree();
 	const startTime = React.useRef<number | null>(null);
 	useFrame(() => {
@@ -21,15 +28,28 @@ function CameraZoomIn() {
 			startTime.current = clock.getElapsedTime();
 		const elapsed = clock.getElapsedTime() - (startTime.current ?? 0);
 		const t = Math.min(elapsed / 1, 1); // 1 second duration
-		camera.position.set(0, 0, 5 - 5 * t);
-		camera.lookAt(0, 0, 10); // Look in the opposite direction (positive z)
+		// Camera zoom-in
+		const z = 5 - 5 * t;
+		// Map cursorX/Y (0-1) to camera rotation/offsets
+		// Center is (0.5, 0.5)
+		const maxPan = 0.6; // how much to pan left/right (in units)
+		const maxTilt = 0.35; // how much to tilt up/down (in units)
+		const pan = (cursorX - 0.5) * 2 * maxPan; // -maxPan to +maxPan
+		const tilt = (cursorY - 0.5) * 2 * maxTilt; // -maxTilt to +maxTilt
+		camera.position.set(pan, -tilt, z);
+		// Look at a point slightly ahead, also offset by pan/tilt for realism
+		camera.lookAt(pan * 0.7, -tilt * 0.7, 10);
 		camera.updateProjectionMatrix();
 	});
 	return null;
 }
 
 // Cockpit view component
-function XWingCockpitView() {
+interface XWingCockpitViewProps {
+	cursorX: number;
+	cursorY: number;
+}
+function XWingCockpitView({ cursorX, cursorY }: XWingCockpitViewProps) {
 	const { scene } = useGLTF("/assets/a_wing_cockpit.glb");
 	return (
 		<div className="absolute inset-0 w-full h-full z-20">
@@ -37,7 +57,7 @@ function XWingCockpitView() {
 				camera={{ position: [0, 0, 5], fov: 75 }}
 				style={{ background: "transparent" }}
 			>
-				<CameraZoomIn />
+				<CameraCockpitPOV cursorX={cursorX} cursorY={cursorY} />
 				<ambientLight intensity={2} />
 				<directionalLight
 					position={[0, 0, 5]}
@@ -85,6 +105,54 @@ function GlobalLoaderOverlay() {
 	);
 }
 
+// Galaxy background variants
+const GALAXY_VARIANTS = [
+	{
+		name: "Classic Deep Space",
+		gradient: "bg-gradient-to-b from-[#090921] via-[#161B33] to-[#0F1644]",
+	},
+	{
+		name: "Nebula Blue",
+		gradient: "bg-gradient-to-b from-[#0a1a2f] via-[#1a2a4f] to-[#0e1a3a]",
+	},
+	{
+		name: "Purple Night",
+		gradient: "bg-gradient-to-b from-[#1a0921] via-[#3a1b4f] to-[#2f0f44]",
+	},
+	{
+		name: "Emerald Void",
+		gradient: "bg-gradient-to-b from-[#09211a] via-[#1b334f] to-[#0f442f]",
+	},
+	{
+		name: "Dark Matter",
+		gradient: "bg-gradient-to-b from-[#111111] via-[#222233] to-[#181824]",
+	},
+];
+
+// Helper for lerp
+function lerp(a: number, b: number, t: number) {
+	return a + (b - a) * t;
+}
+
+// Naboo Starfighter 3D component
+function NabooStarfighter({
+	position,
+	rotation,
+}: {
+	position: [number, number, number];
+	rotation?: [number, number, number];
+}) {
+	const { scene } = useGLTF("/models/naboo_starfighter.glb");
+	return (
+		<primitive
+			object={scene}
+			position={position}
+			rotation={rotation}
+			scale={[2.5, 2.5, 2.5]}
+		/>
+	);
+}
+
 export function Hero() {
 	const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 	const [isCursorInHero, setIsCursorInHero] = useState(false);
@@ -105,8 +173,10 @@ export function Hero() {
 	const [hyperjumping, setHyperjumping] = useState(false);
 	const [hyperjumpProgress, setHyperjumpProgress] = useState(0); // 0 to 1
 
-	// Environment state: 'space' or 'desert'
-	// const [environment, setEnvironment] = useState<"space" | "desert">("space");
+	// Sky background variant state
+	const [galaxyIndex, setGalaxyIndex] = useState(0);
+	const handleNextGalaxy = () =>
+		setGalaxyIndex((i) => (i + 1) % GALAXY_VARIANTS.length);
 
 	// Cockpit view handler (used for both Hyperjump and Cockpit buttons)
 	const handleCockpitView = () => {
@@ -170,6 +240,119 @@ export function Hero() {
 		};
 	}, [handleMouseMove]);
 
+	// Starfighter animation state and logic
+	const [starfighterPos, setStarfighterPos] = useState({ x: -100, y: 0 });
+	const [starfighterVisible, setStarfighterVisible] = useState(true);
+	const [starfighterRotation, setStarfighterRotation] = useState(0);
+	const [bullet, setBullet] = useState<null | {
+		x: number;
+		y: number;
+		t: number;
+	}>(null);
+	const bulletRef = useRef<HTMLDivElement>(null);
+	// Alien ship position (match the floating alien ship in the background)
+	const [alienShipPos, setAlienShipPos] = useState({ x: 0, y: 0 });
+	useEffect(() => {
+		// Only access window in useEffect (client-side)
+		if (typeof window !== "undefined") {
+			setAlienShipPos({
+				x: window.innerWidth * 0.65,
+				y: window.innerHeight * 0.25,
+			});
+		}
+	}, []);
+	// Random path parameters (amplitude, frequency, phase)
+	const pathParams = useRef({
+		amplitude: 80 + Math.random() * 120, // px
+		frequency: 0.7 + Math.random() * 0.7, // radians per second
+		phase: Math.random() * Math.PI * 2,
+		verticalOffset: 0, // Will be set in useEffect
+		speed: 3.5 + Math.random() * 1.5, // seconds to cross
+	});
+
+	useEffect(() => {
+		// Update verticalOffset with window height
+		if (typeof window !== "undefined") {
+			pathParams.current.verticalOffset =
+				window.innerHeight / 2 + (Math.random() - 0.5) * 120;
+		}
+	}, []);
+
+	// useEffect(() => {
+	// 	let t = 0;
+	// 	let raf: number;
+	// 	let hasFired = false;
+
+	// 	// Only run animation on client side
+	// 	if (typeof window === "undefined") return;
+
+	// 	function animate() {
+	// 		t += 0.016; // ~60fps
+	// 		const { amplitude, frequency, phase, verticalOffset, speed } =
+	// 			pathParams.current;
+	// 		const startX = -100;
+	// 		const endX = window.innerWidth + 100;
+	// 		const progress = t / speed;
+	// 		const x = lerp(startX, endX, progress);
+	// 		// Random smooth y path
+	// 		const y =
+	// 			verticalOffset +
+	// 			amplitude * Math.sin(progress * Math.PI * frequency + phase);
+	// 		setStarfighterPos({ x, y });
+	// 		setStarfighterRotation(0);
+	// 		// Fire bullet when starfighter is about 1/3 across the screen
+	// 		if (!hasFired && progress > 0.33) {
+	// 			setBullet({ x, y, t: 0 });
+	// 			hasFired = true;
+	// 		}
+	// 		// Animate bullet
+	// 		if (bullet) {
+	// 			const bulletSpeed = 0.025;
+	// 			const newT = bullet.t + bulletSpeed;
+	// 			const bx = lerp(bullet.x, alienShipPos.x, newT);
+	// 			const by = lerp(bullet.y, alienShipPos.y, newT);
+	// 			setBullet(
+	// 				newT < 1 ? { x: bullet.x, y: bullet.y, t: newT } : null
+	// 			);
+	// 			if (bulletRef.current) {
+	// 				bulletRef.current.style.left = `${bx}px`;
+	// 				bulletRef.current.style.top = `${by}px`;
+	// 			}
+	// 		}
+	// 		// When starfighter leaves the screen, reset with new random path
+	// 		if (progress >= 1) {
+	// 			setTimeout(() => {
+	// 				pathParams.current = {
+	// 					amplitude: 80 + Math.random() * 120,
+	// 					frequency: 0.7 + Math.random() * 0.7,
+	// 					phase: Math.random() * Math.PI * 2,
+	// 					verticalOffset:
+	// 						window.innerHeight / 2 +
+	// 						(Math.random() - 0.5) * 120,
+	// 					speed: 3.5 + Math.random() * 1.5,
+	// 				};
+	// 				setStarfighterPos({ x: startX, y });
+	// 				setStarfighterVisible(true);
+	// 				t = 0;
+	// 				hasFired = false;
+	// 			}, 500);
+	// 			setStarfighterVisible(false);
+	// 			return;
+	// 		}
+	// 		raf = requestAnimationFrame(animate);
+	// 	}
+	// 	raf = requestAnimationFrame(animate);
+	// 	return () => cancelAnimationFrame(raf);
+	// 	// eslint-disable-next-line
+	// }, [bullet]);
+
+	// Set initial y position for starfighter on client
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			setStarfighterPos((pos) => ({ ...pos, y: window.innerHeight / 2 }));
+		}
+	}, []);
+
 	if (!isMounted) {
 		return null;
 	}
@@ -199,7 +382,85 @@ export function Hero() {
 
 			{/* Cockpit View */}
 			{isCockpit ? (
-				<XWingCockpitView />
+				<>
+					<XWingCockpitView
+						cursorX={
+							isCursorInHero &&
+							!isCursorInNavbar &&
+							typeof window !== "undefined"
+								? cursorPosition.x / window.innerWidth
+								: 0.5
+						}
+						cursorY={
+							isCursorInHero &&
+							!isCursorInNavbar &&
+							typeof window !== "undefined"
+								? cursorPosition.y / window.innerHeight
+								: 0.5
+						}
+					/>
+					{/* Crosshair Cursor in Cockpit Mode */}
+					{isCursorInHero && !isCursorInNavbar && (
+						<div
+							className="fixed pointer-events-none z-50"
+							style={{
+								transform: `translate(${cursorPosition.x}px, ${cursorPosition.y}px)`,
+								transition: `transform ${
+									0.1 / starfighterSpeed
+								}s ease-out`,
+							}}
+						>
+							<svg
+								width="48"
+								height="48"
+								viewBox="0 0 48 48"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<circle
+									cx="24"
+									cy="24"
+									r="10"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="24"
+									y1="4"
+									x2="24"
+									y2="16"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="24"
+									y1="32"
+									x2="24"
+									y2="44"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="4"
+									y1="24"
+									x2="16"
+									y2="24"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="32"
+									y1="24"
+									x2="44"
+									y2="24"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<circle cx="24" cy="24" r="2" fill="#FFD600" />
+							</svg>
+						</div>
+					)}
+				</>
 			) : (
 				<>
 					{/* 3D Models */}
@@ -220,16 +481,12 @@ export function Hero() {
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
 						/>
-						{/* <Neptune3D scale={planetSize} /> */}
 						<Juno3D
 							scale={planetSize}
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
 						/>
-						{/* <Sun3D
-							scale={planetSize}
-							speed={starfighterSpeed}
-						/> */}
+						{/* <BlackHole3D position={[35, 5, -10]} scale={0.8} /> */}
 					</div>
 
 					{/* Custom Cursor */}
@@ -243,15 +500,63 @@ export function Hero() {
 								}s ease-out`,
 							}}
 						>
-							<Starfighter x={0} y={0} scale={0.6} rotation={0} />
+							{/* Crosshair SVG */}
+							<svg
+								width="48"
+								height="48"
+								viewBox="0 0 48 48"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<circle
+									cx="24"
+									cy="24"
+									r="10"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="24"
+									y1="4"
+									x2="24"
+									y2="16"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="24"
+									y1="32"
+									x2="24"
+									y2="44"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="4"
+									y1="24"
+									x2="16"
+									y2="24"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<line
+									x1="32"
+									y1="24"
+									x2="44"
+									y2="24"
+									stroke="#FFD600"
+									strokeWidth="2"
+								/>
+								<circle cx="24" cy="24" r="2" fill="#FFD600" />
+							</svg>
 						</div>
 					)}
 
 					{/* Galaxy Background */}
 					<div className="absolute inset-0 z-0">
-						{/* Deep Space */}
+						{/* Dynamic Galaxy Background */}
 						<div
-							className="absolute inset-0 bg-gradient-to-b from-[#090921] via-[#161B33] to-[#0F1644]"
+							className={`absolute inset-0 ${GALAXY_VARIANTS[galaxyIndex].gradient}`}
 							style={{
 								transition: "background-color 0.3s ease",
 							}}
@@ -497,7 +802,46 @@ export function Hero() {
 						onHyperspeedJump={handleHyperjump}
 						onCockpitView={handleCockpitView}
 						onReset={handleReset}
+						galaxyName={GALAXY_VARIANTS[galaxyIndex].name}
+						onNextGalaxy={handleNextGalaxy}
 					/>
+
+					{/* Render StarFighter at center of the screen for test */}
+					{/* <StarFighter
+						x={
+							typeof window !== "undefined"
+								? window.innerWidth / 2
+								: 0
+						}
+						y={
+							typeof window !== "undefined"
+								? window.innerHeight / 2
+								: 0
+						}
+						rotation={0}
+						visible={true}
+					/> */}
+
+					{/* Bullet/laser fired towards alien ship */}
+					{/* {bullet && (
+						<div
+							ref={bulletRef}
+							style={{
+								position: "fixed",
+								left: starfighterPos.x,
+								top: starfighterPos.y,
+								width: 8,
+								height: 8,
+								zIndex: 29,
+								pointerEvents: "none",
+								transform: "translate(-50%, -50%)",
+							}}
+						>
+							<svg width="8" height="8">
+								<circle cx="4" cy="4" r="4" fill="#ff2d55" />
+							</svg>
+						</div>
+					)} */}
 				</>
 			)}
 

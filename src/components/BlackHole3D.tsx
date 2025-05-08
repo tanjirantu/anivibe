@@ -1,106 +1,112 @@
 "use client";
 
-import React from "react";
-import { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 interface BlackHole3DProps {
+	position?: [number, number, number];
 	scale?: number;
-	speed?: number;
 }
 
-const SCALE = 0.08;
-
-function BlackHoleModel({ scale = 1, speed = 1 }: BlackHole3DProps) {
-	const group = useRef<THREE.Group>(null);
+// Inner component that handles the actual 3D model
+function BlackHoleModel({
+	position = [0, 0, 0],
+	scale = 0.5,
+}: {
+	position: [number, number, number];
+	scale: number;
+}) {
 	const { scene } = useGLTF("/models/blackhole_02.glb");
+	const blackHoleRef = useRef<THREE.Group>(null);
 
-	useFrame((state, delta) => {
-		if (group.current) {
-			// Rotate the blackhole
-			group.current.rotation.y += delta * speed * 0.5;
+	// Set up black hole materials and effects
+	useEffect(() => {
+		if (!scene) return;
+
+		scene.traverse((child: any) => {
+			if (child.isMesh) {
+				// Enhance materials for better visual effect
+				if (child.material) {
+					// Make it slightly transparent for better blending
+					child.material.transparent = true;
+
+					// If it's the event horizon or core, make it dark with subtle glow
+					if (
+						child.name.includes("horizon") ||
+						child.name.includes("core")
+					) {
+						child.material.emissive = new THREE.Color(0x000000);
+						child.material.emissiveIntensity = 1;
+					}
+
+					// If it's the accretion disk, make it glow with blue/purple hue
+					if (
+						child.name.includes("disk") ||
+						child.name.includes("accretion")
+					) {
+						child.material.emissive = new THREE.Color(0x0088ff);
+						child.material.emissiveIntensity = 2;
+					}
+				}
+			}
+		});
+	}, [scene]);
+
+	// Animate the black hole
+	useFrame((state) => {
+		if (blackHoleRef.current) {
+			// Rotate continuously
+			blackHoleRef.current.rotation.y =
+				state.clock.getElapsedTime() * 0.2;
+
+			// Subtle pulsing effect
+			const pulseFactor =
+				1 + Math.sin(state.clock.getElapsedTime() * 0.5) * 0.05;
+			const currentScale = scale * pulseFactor;
+			blackHoleRef.current.scale.set(
+				currentScale,
+				currentScale,
+				currentScale
+			);
 		}
 	});
 
 	return (
-		<group
-			ref={group}
-			scale={[scale * SCALE, scale * SCALE, scale * SCALE]}
-			rotation={[Math.PI / 5, 2, 0]} // Tilt for better visibility
-		>
+		<group ref={blackHoleRef} position={position}>
 			<primitive object={scene} />
 		</group>
 	);
 }
 
-export function BlackHole3D({ scale = 1, speed = 1 }: BlackHole3DProps) {
+// Wrapper component that handles client-side rendering safely
+const BlackHole3D: React.FC<BlackHole3DProps> = ({
+	position = [30, 0, 0],
+	scale = 0.5,
+}) => {
+	const [isMounted, setIsMounted] = useState(false);
+
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
+	if (!isMounted) {
+		return null; // Return null on server-side
+	}
+
 	return (
-		<div
-			className="absolute top-[10%] left-[20%] w-full h-full"
-			style={{ transform: `scale(${scale})` }}
-		>
-			{/* Glow Effect */}
-			<div className="absolute inset-0 flex items-center justify-center">
-				<div className="absolute w-[200px] h-[200px] rounded-full bg-purple-500/20 blur-[50px] animate-pulse-glow" />
-				<div className="absolute w-[150px] h-[150px] rounded-full bg-purple-600/20 blur-[40px] animate-pulse-glow-delayed" />
-			</div>
-
-			<Canvas camera={{ position: [0, 0, 5], fov: 60 }}>
-				{/* Ambient light for general illumination */}
+		<div className="absolute inset-0 w-full h-full">
+			<Canvas
+				camera={{ position: [0, 0, 50], fov: 60 }}
+				style={{ background: "transparent" }}
+			>
 				<ambientLight intensity={0.5} />
-
-				{/* Main directional light */}
-				<directionalLight
-					position={[5, 5, 5]}
-					intensity={1}
-					color="#ffffff"
-				/>
-
-				{/* Accent light for blackhole glow */}
-				<pointLight
-					position={[0, 0, 0]}
-					intensity={3}
-					color="#ff00ff"
-					distance={5}
-				/>
-
-				{/* Blackhole model */}
-				<BlackHoleModel scale={scale} speed={speed} />
-
-				{/* Disable orbit controls for static display */}
-				<OrbitControls
-					enableZoom={false}
-					enablePan={false}
-					enableRotate={false}
-				/>
+				<directionalLight position={[10, 10, 10]} intensity={1} />
+				<BlackHoleModel position={position} scale={scale} />
 			</Canvas>
-
-			{/* Glow Animation */}
-			<style jsx global>{`
-				@keyframes pulse-glow {
-					0% {
-						transform: scale(1);
-						opacity: 0.3;
-					}
-					50% {
-						transform: scale(1.2);
-						opacity: 0.6;
-					}
-					100% {
-						transform: scale(1);
-						opacity: 0.3;
-					}
-				}
-				.animate-pulse-glow {
-					animation: pulse-glow 3s ease-in-out infinite;
-				}
-				.animate-pulse-glow-delayed {
-					animation: pulse-glow 3s ease-in-out infinite;
-					animation-delay: 1.5s;
-				}
-			`}</style>
 		</div>
 	);
-}
+};
+
+export default BlackHole3D;

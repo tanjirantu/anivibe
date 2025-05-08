@@ -19,8 +19,8 @@ function JupiterModel({ scale = 1, hyperjumpProgress = 0 }: Planet3DProps) {
 	const { scene } = useGLTF("/models/earth_nasa.glb");
 
 	// Initial positions
-	const initialX = 0;
-	const initialZ = -10;
+	const initialX = -10;
+	const initialZ = -5;
 
 	useFrame((state, delta) => {
 		if (group.current) {
