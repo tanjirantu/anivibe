@@ -64,10 +64,21 @@ export function Juno3D({
 	// hyperjumping = false,
 	hyperjumpProgress = 0,
 }: Juno3DProps) {
+	// Hide Juno during hyperjump
+	if (hyperjumpProgress > 0.2) {
+		return null;
+	}
+
+	// Fade out effect during start of hyperjump
+	const opacity = hyperjumpProgress > 0 ? 1 - hyperjumpProgress / 0.2 : 1;
+
 	return (
 		<div
 			className="absolute top-[-30%] right-[27%] w-full h-full"
-			style={{ transform: `scale(${scale})` }}
+			style={{
+				transform: `scale(${scale})`,
+				opacity,
+			}}
 		>
 			<Canvas
 				camera={{ position: [0, 0, 5], fov: 60 }}

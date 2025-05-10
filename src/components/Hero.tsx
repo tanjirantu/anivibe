@@ -5,13 +5,14 @@ import { StarFighter3D } from "./StarFighter3D";
 import { Planet3D } from "./Planet3D";
 import { Saturn3D } from "./Saturn3D";
 import { Juno3D } from "./Juno3D";
+import { Sun3D } from "./Sun3D";
 import { ControlPanel } from "./ControlPanel";
 import Image from "next/image";
 import { StarfieldCanvas } from "./StarfieldCanvas";
 import { useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import BlackHole3D from "./BlackHole3D";
-import StarFighter from "./StarFighter";
+import Austronaut from "./Austronaut";
+import { AnimatedText } from "./AnimatedText";
 
 // Camera component for cockpit POV with cursor-based movement
 function CameraCockpitPOV({
@@ -240,119 +241,6 @@ export function Hero() {
 		};
 	}, [handleMouseMove]);
 
-	// Starfighter animation state and logic
-	const [starfighterPos, setStarfighterPos] = useState({ x: -100, y: 0 });
-	const [starfighterVisible, setStarfighterVisible] = useState(true);
-	const [starfighterRotation, setStarfighterRotation] = useState(0);
-	const [bullet, setBullet] = useState<null | {
-		x: number;
-		y: number;
-		t: number;
-	}>(null);
-	const bulletRef = useRef<HTMLDivElement>(null);
-	// Alien ship position (match the floating alien ship in the background)
-	const [alienShipPos, setAlienShipPos] = useState({ x: 0, y: 0 });
-	useEffect(() => {
-		// Only access window in useEffect (client-side)
-		if (typeof window !== "undefined") {
-			setAlienShipPos({
-				x: window.innerWidth * 0.65,
-				y: window.innerHeight * 0.25,
-			});
-		}
-	}, []);
-	// Random path parameters (amplitude, frequency, phase)
-	const pathParams = useRef({
-		amplitude: 80 + Math.random() * 120, // px
-		frequency: 0.7 + Math.random() * 0.7, // radians per second
-		phase: Math.random() * Math.PI * 2,
-		verticalOffset: 0, // Will be set in useEffect
-		speed: 3.5 + Math.random() * 1.5, // seconds to cross
-	});
-
-	useEffect(() => {
-		// Update verticalOffset with window height
-		if (typeof window !== "undefined") {
-			pathParams.current.verticalOffset =
-				window.innerHeight / 2 + (Math.random() - 0.5) * 120;
-		}
-	}, []);
-
-	// useEffect(() => {
-	// 	let t = 0;
-	// 	let raf: number;
-	// 	let hasFired = false;
-
-	// 	// Only run animation on client side
-	// 	if (typeof window === "undefined") return;
-
-	// 	function animate() {
-	// 		t += 0.016; // ~60fps
-	// 		const { amplitude, frequency, phase, verticalOffset, speed } =
-	// 			pathParams.current;
-	// 		const startX = -100;
-	// 		const endX = window.innerWidth + 100;
-	// 		const progress = t / speed;
-	// 		const x = lerp(startX, endX, progress);
-	// 		// Random smooth y path
-	// 		const y =
-	// 			verticalOffset +
-	// 			amplitude * Math.sin(progress * Math.PI * frequency + phase);
-	// 		setStarfighterPos({ x, y });
-	// 		setStarfighterRotation(0);
-	// 		// Fire bullet when starfighter is about 1/3 across the screen
-	// 		if (!hasFired && progress > 0.33) {
-	// 			setBullet({ x, y, t: 0 });
-	// 			hasFired = true;
-	// 		}
-	// 		// Animate bullet
-	// 		if (bullet) {
-	// 			const bulletSpeed = 0.025;
-	// 			const newT = bullet.t + bulletSpeed;
-	// 			const bx = lerp(bullet.x, alienShipPos.x, newT);
-	// 			const by = lerp(bullet.y, alienShipPos.y, newT);
-	// 			setBullet(
-	// 				newT < 1 ? { x: bullet.x, y: bullet.y, t: newT } : null
-	// 			);
-	// 			if (bulletRef.current) {
-	// 				bulletRef.current.style.left = `${bx}px`;
-	// 				bulletRef.current.style.top = `${by}px`;
-	// 			}
-	// 		}
-	// 		// When starfighter leaves the screen, reset with new random path
-	// 		if (progress >= 1) {
-	// 			setTimeout(() => {
-	// 				pathParams.current = {
-	// 					amplitude: 80 + Math.random() * 120,
-	// 					frequency: 0.7 + Math.random() * 0.7,
-	// 					phase: Math.random() * Math.PI * 2,
-	// 					verticalOffset:
-	// 						window.innerHeight / 2 +
-	// 						(Math.random() - 0.5) * 120,
-	// 					speed: 3.5 + Math.random() * 1.5,
-	// 				};
-	// 				setStarfighterPos({ x: startX, y });
-	// 				setStarfighterVisible(true);
-	// 				t = 0;
-	// 				hasFired = false;
-	// 			}, 500);
-	// 			setStarfighterVisible(false);
-	// 			return;
-	// 		}
-	// 		raf = requestAnimationFrame(animate);
-	// 	}
-	// 	raf = requestAnimationFrame(animate);
-	// 	return () => cancelAnimationFrame(raf);
-	// 	// eslint-disable-next-line
-	// }, [bullet]);
-
-	// Set initial y position for starfighter on client
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			setStarfighterPos((pos) => ({ ...pos, y: window.innerHeight / 2 }));
-		}
-	}, []);
-
 	if (!isMounted) {
 		return null;
 	}
@@ -465,6 +353,16 @@ export function Hero() {
 				<>
 					{/* 3D Models */}
 					<div className="absolute inset-0 w-full h-full z-10">
+						{/* Sun - positioned in the far side of the scene */}
+						<Sun3D
+							scale={planetSize * 1}
+							speed={starfighterSpeed}
+							hyperjumping={hyperjumping}
+							hyperjumpProgress={hyperjumpProgress}
+						/>
+
+						{/* These components will be conditionally rendered based on hyperjump state */}
+						{/* Each component has its own visibility logic now */}
 						<Planet3D
 							scale={planetSize}
 							hyperjumping={hyperjumping}
@@ -476,21 +374,68 @@ export function Hero() {
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
 						/>
+						{/* StarFighter3D is always visible, even during hyperjump */}
 						<StarFighter3D
 							speed={starfighterSpeed}
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
+							mouseX={
+								typeof window !== "undefined"
+									? cursorPosition.x / window.innerWidth
+									: 0.5
+							}
 						/>
 						<Juno3D
 							scale={planetSize}
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
 						/>
-						{/* <BlackHole3D position={[35, 5, -10]} scale={0.8} /> */}
+
+						{/* Comets Canvas */}
+						{!hyperjumping && (
+							<div
+								className="absolute inset-0 w-full h-full"
+								style={{
+									opacity:
+										hyperjumpProgress > 0
+											? 1 - hyperjumpProgress / 0.2
+											: 1,
+								}}
+							>
+								<Canvas
+									camera={{ position: [0, 0, 5], fov: 75 }}
+									style={{ background: "transparent" }}
+								>
+									{/* Ambient light - warm glow */}
+									<ambientLight
+										intensity={0.3}
+										color="#ff9900"
+									/>
+
+									{/* Main directional light - warm sunlight */}
+									<directionalLight
+										position={[10, 10, 5]}
+										intensity={0.85}
+										color="#ffdd99"
+									/>
+
+									{/* Accent light for dramatic effect */}
+									<pointLight
+										position={[30, 20, -10]}
+										intensity={0.75}
+										color="#ff3300"
+										distance={100}
+										decay={2}
+									/>
+
+									{/* Comets removed for performance */}
+								</Canvas>
+							</div>
+						)}
 					</div>
 
-					{/* Custom Cursor */}
-					{isCursorInHero && !isCursorInNavbar && (
+					{/* Custom Cursor - hide during hyperjump */}
+					{isCursorInHero && !isCursorInNavbar && !hyperjumping && (
 						<div
 							className="fixed pointer-events-none z-50"
 							style={{
@@ -552,13 +497,17 @@ export function Hero() {
 						</div>
 					)}
 
-					{/* Galaxy Background */}
+					{/* Galaxy Background - fade out during hyperjump */}
 					<div className="absolute inset-0 z-0">
 						{/* Dynamic Galaxy Background */}
 						<div
 							className={`absolute inset-0 ${GALAXY_VARIANTS[galaxyIndex].gradient}`}
 							style={{
 								transition: "background-color 0.3s ease",
+								opacity:
+									hyperjumpProgress > 0
+										? 1 - hyperjumpProgress / 0.2
+										: 1,
 							}}
 						/>
 
@@ -621,177 +570,135 @@ export function Hero() {
 							/>
 						</div> */}
 
-						{/* Floating Alien Ship */}
-						<div className="absolute top-[25%] right-[35%] w-[48px] h-[48px] animate-float-ship">
-							<Image
-								src="/assets/alien_ship.png"
-								alt="Alien Ship"
-								width={48}
-								height={48}
-								className="w-full h-full object-contain"
-							/>
-						</div>
+						{/* Floating Alien Ship - Removed as it's now part of Planet3D */}
 
-						{/* Floating Asteroid */}
-						<div className="absolute top-[60%] left-[30%] w-[32px] h-[32px] animate-float-asteroid">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={32}
-								height={32}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-
-						{/* Asteroid Group 1 */}
-						<div className="absolute top-[40%] left-[15%] w-[24px] h-[24px] animate-float-asteroid-1">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={24}
-								height={24}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-						<div className="absolute top-[45%] left-[18%] w-[20px] h-[20px] animate-float-asteroid-2">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={20}
-								height={20}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-						<div className="absolute top-[38%] left-[20%] w-[28px] h-[28px] animate-float-asteroid-3">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={28}
-								height={28}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-
-						{/* Asteroid Group 2 */}
-						<div className="absolute top-[70%] right-[25%] w-[18px] h-[18px] animate-float-asteroid-4">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={18}
-								height={18}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-						<div className="absolute top-[75%] right-[28%] w-[16px] h-[16px] animate-float-asteroid-5">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={16}
-								height={16}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-						<div className="absolute top-[72%] right-[22%] w-[12px] h-[12px] animate-float-asteroid-6">
-							<Image
-								src="/assets/astroid_01.png"
-								alt="Asteroid"
-								width={12}
-								height={12}
-								className="w-full h-full object-contain"
-							/>
-						</div>
-
-						{/* Comet 1 */}
-						<div className="absolute top-0 left-[-40px] w-[40px] h-[40px] animate-comet-1">
-							<Image
-								src="/assets/comet_04.png"
-								alt="Comet"
-								width={40}
-								height={40}
-								className="w-full h-full object-contain"
-							/>
-							<div className="absolute inset-0 w-full h-full bg-white/30 blur-[20px] animate-comet-trail-1"></div>
-						</div>
-
-						{/* Planets */}
-						{/* <div className="absolute top-[15%] left-[10%] w-[40px] h-[40px] animate-planet-glow">
-							<img
-								src="/assets/planet_02.png"
-								alt="Planet"
-								className="w-full h-full object-contain"
-							/>
-							<div className="absolute inset-0 w-full h-full bg-blue-500/20 blur-[20px] rounded-full"></div>
-						</div> */}
-
-						{/* <div className="absolute top-[60%] right-[15%] w-[100px] h-[100px] animate-planet-glow">
-							<img
-								src="/assets/planet_03.png"
-								alt="Planet"
-								className="w-full h-full object-contain"
-							/>
-							<div className="absolute inset-0 w-full h-full bg-purple-500/20 blur-[30px] rounded-full"></div>
-						</div> */}
-
-						{/* <div className="absolute top-[30%] right-[30%] w-[120px] h-[120px] animate-planet-glow">
-							<Image
-								src="/assets/planet_04.png"
-								alt="Planet"
-								width={120}
-								height={120}
-								className="w-full h-full object-contain"
-							/>
-							<div className="absolute inset-0 w-full h-full bg-orange-500/20 blur-[20px] rounded-full"></div>
-						</div> */}
-
-						{/* <div className="absolute top-[70%] left-[25%] w-[90px] h-[90px] animate-planet-glow">
-							<img
-								src="/assets/planet_05.png"
-								alt="Planet"
-								className="w-full h-full object-contain"
-							/>
-							<div className="absolute inset-0 w-full h-full bg-green-500/20 blur-[20px] rounded-full"></div>
-						</div> */}
-					</div>
-
-					{/* Content */}
-					<div className="h-full w-full relative z-10 grid lg:grid-cols-2 gap-8">
-						{/* Left Column - Text */}
-						{/* <div className="flex flex-col justify-center space-y-6">
-							<div className="relative">
-								<div className="absolute -left-8 top-0 bottom-0 w-1 bg-yellow-400"></div>
-								<h1 className="text-5xl font-bold text-yellow-400 drop-shadow-lg font-star-wars tracking-wider">
-									<AnimatedText
-										text='"Do or do not, there is no try"'
-										typingSpeed={100}
-										erasingSpeed={50}
-										delay={2000}
+						{/* Floating Asteroids - hide during hyperjump */}
+						{(!hyperjumping || hyperjumpProgress < 0.2) && (
+							<>
+								{/* Floating Asteroid */}
+								<div
+									className="absolute top-[60%] left-[30%] w-[32px] h-[32px] animate-float-asteroid"
+									style={{
+										opacity:
+											hyperjumpProgress > 0
+												? 1 - hyperjumpProgress / 0.2
+												: 1,
+									}}
+								>
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={32}
+										height={32}
+										className="w-full h-full object-contain"
 									/>
-								</h1>
-								<p className="text-right text-xl text-yellow-400/80 drop-shadow mt-2 font-star-wars">
-									- Master Yoda
-								</p>
-							</div>
-							<p className="text-xl text-white/90 drop-shadow">
-								Explore my journey through the digital universe, where
-								creativity meets technology.
-							</p>
-							<div className="flex gap-4">
-								<button className="px-6 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 transition-colors font-bold border-2 border-yellow-600 shadow-[0_0_10px_rgba(255,223,0,0.5)] hover:shadow-[0_0_15px_rgba(255,223,0,0.7)]">
-									View My Work
-								</button>
-								<button className="px-6 py-3 bg-transparent text-yellow-400 rounded-lg hover:bg-yellow-400/10 transition-colors font-bold border-2 border-yellow-400 shadow-[0_0_10px_rgba(255,223,0,0.3)] hover:shadow-[0_0_15px_rgba(255,223,0,0.5)]">
-									Contact Me
-								</button>
-							</div>
-						</div> */}
+								</div>
 
-						{/* Right Column - Starfighter */}
-						<div className="hidden lg:flex items-center justify-center relative">
-							{/* <Starfighter x={400} y={400} scale={1.2} rotation={0} /> */}
-						</div>
+								{/* Asteroid Group 1 */}
+								<div className="absolute top-[40%] left-[15%] w-[24px] h-[24px] animate-float-asteroid-1">
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={24}
+										height={24}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+								<div className="absolute top-[45%] left-[18%] w-[20px] h-[20px] animate-float-asteroid-2">
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={20}
+										height={20}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+								<div className="absolute top-[38%] left-[20%] w-[28px] h-[28px] animate-float-asteroid-3">
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={28}
+										height={28}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+
+								{/* Asteroid Group 2 */}
+								<div className="absolute top-[70%] right-[25%] w-[18px] h-[18px] animate-float-asteroid-4">
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={18}
+										height={18}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+								<div className="absolute top-[75%] right-[28%] w-[16px] h-[16px] animate-float-asteroid-5">
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={16}
+										height={16}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+								<div className="absolute top-[72%] right-[22%] w-[12px] h-[12px] animate-float-asteroid-6">
+									<Image
+										src="/assets/astroid_01.png"
+										alt="Asteroid"
+										width={12}
+										height={12}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+							</>
+						)}
+
+						{/* Comets - hide during hyperjump */}
+						{!hyperjumping && (
+							<>
+								{/* Comet 1 */}
+								<div
+									className="absolute top-0 left-[-40px] w-[40px] h-[40px] animate-comet-1"
+									style={{
+										opacity:
+											hyperjumpProgress > 0
+												? 1 - hyperjumpProgress / 0.2
+												: 1,
+									}}
+								>
+									<Image
+										src="/assets/comet_04.png"
+										alt="Comet"
+										width={40}
+										height={40}
+										className="w-full h-full object-contain"
+									/>
+									<div className="absolute inset-0 w-full h-full bg-white/30 blur-[20px] animate-comet-trail-1"></div>
+								</div>
+							</>
+						)}
 					</div>
 
-					{/* Control Panel */}
+					{/* Content - hide during hyperjump */}
+					{(!hyperjumping || hyperjumpProgress < 0.2) && (
+						<div
+							className="h-full w-full relative z-10 grid lg:grid-cols-2 gap-8"
+							style={{
+								opacity:
+									hyperjumpProgress > 0
+										? 1 - hyperjumpProgress / 0.2
+										: 1,
+							}}
+						>
+							{/* Right Column - previously had Starfighter component */}
+							<div className="hidden lg:flex items-center justify-center relative">
+								{/* Starfighter component removed */}
+							</div>
+						</div>
+					)}
+
+					{/* Control Panel - keep visible */}
 					<ControlPanel
 						dustSpeed={dustSpeed}
 						onDustSpeedChange={setDustSpeed}
@@ -806,42 +713,32 @@ export function Hero() {
 						onNextGalaxy={handleNextGalaxy}
 					/>
 
-					{/* Render StarFighter at center of the screen for test */}
-					{/* <StarFighter
-						x={
-							typeof window !== "undefined"
-								? window.innerWidth / 2
-								: 0
-						}
-						y={
-							typeof window !== "undefined"
-								? window.innerHeight / 2
-								: 0
-						}
-						rotation={0}
-						visible={true}
-					/> */}
-
-					{/* Bullet/laser fired towards alien ship */}
-					{/* {bullet && (
+					{/* Render Astronaut at center of the screen - hide during hyperjump */}
+					{(!hyperjumping || hyperjumpProgress < 0.2) && (
 						<div
-							ref={bulletRef}
 							style={{
-								position: "fixed",
-								left: starfighterPos.x,
-								top: starfighterPos.y,
-								width: 8,
-								height: 8,
-								zIndex: 29,
-								pointerEvents: "none",
-								transform: "translate(-50%, -50%)",
+								opacity:
+									hyperjumpProgress > 0
+										? 1 - hyperjumpProgress / 0.2
+										: 1,
 							}}
 						>
-							<svg width="8" height="8">
-								<circle cx="4" cy="4" r="4" fill="#ff2d55" />
-							</svg>
+							<Austronaut
+								x={
+									typeof window !== "undefined"
+										? window.innerWidth / 2
+										: 0
+								}
+								y={
+									typeof window !== "undefined"
+										? window.innerHeight / 2
+										: 0
+								}
+								rotation={30}
+								visible={true}
+							/>
 						</div>
-					)} */}
+					)}
 				</>
 			)}
 
@@ -907,6 +804,26 @@ export function Hero() {
 				.animate-glow {
 					animation: glow 3s ease-in-out infinite;
 				}
+				@keyframes moon-pulse {
+					0% {
+						opacity: 0.5;
+						transform: scale(1);
+						box-shadow: 0 0 5px 2px rgba(173, 216, 230, 0.5);
+					}
+					50% {
+						opacity: 0.8;
+						transform: scale(1.2);
+						box-shadow: 0 0 15px 5px rgba(173, 216, 230, 0.8);
+					}
+					100% {
+						opacity: 0.5;
+						transform: scale(1);
+						box-shadow: 0 0 5px 2px rgba(173, 216, 230, 0.5);
+					}
+				}
+				.animate-moon-pulse {
+					animation: moon-pulse 3.5s ease-in-out infinite;
+				}
 				@keyframes shooting-star {
 					0% {
 						transform: translateX(0) translateY(0) rotate(-45deg);
@@ -920,6 +837,17 @@ export function Hero() {
 				}
 				.animate-shooting-star {
 					animation: shooting-star 4s linear infinite;
+				}
+				@keyframes spin-slow {
+					from {
+						transform: rotate(0deg);
+					}
+					to {
+						transform: rotate(360deg);
+					}
+				}
+				.animate-spin-slow {
+					animation: spin-slow 5s linear infinite;
 				}
 				@keyframes float-ship {
 					0% {
