@@ -124,8 +124,8 @@ function AsteroidField({ hyperjumping = false, hyperjumpProgress = 0 }) {
 function StarFighterModel({
 	// speed = 1,
 	hyperjumpProgress = 0,
-	mouseX = 0.5, // Default to center
-}: {
+}: // mouseX = 0.5, // Default to center
+{
 	speed?: number;
 	hyperjumpProgress?: number;
 	mouseX?: number;
@@ -167,7 +167,7 @@ function StarFighterModel({
 
 			// Calculate X position based on mouse when hyperjumping
 			// Map mouseX from 0-1 to -8 to 8 for movement range
-			const mouseXOffset = (mouseX - 0.5) * 16;
+			// const mouseXOffset = (mouseX - 0.5) * 16;
 
 			// Move the starfighter from initial position to bottom during hyperjump, plus bounce
 			// Apply mouseX control during hyperjump, increasing effect as hyperjump progresses

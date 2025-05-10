@@ -12,7 +12,6 @@ import { StarfieldCanvas } from "./StarfieldCanvas";
 import { useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import Austronaut from "./Austronaut";
-import { AnimatedText } from "./AnimatedText";
 
 // Camera component for cockpit POV with cursor-based movement
 function CameraCockpitPOV({
@@ -129,30 +128,6 @@ const GALAXY_VARIANTS = [
 		gradient: "bg-gradient-to-b from-[#111111] via-[#222233] to-[#181824]",
 	},
 ];
-
-// Helper for lerp
-function lerp(a: number, b: number, t: number) {
-	return a + (b - a) * t;
-}
-
-// Naboo Starfighter 3D component
-function NabooStarfighter({
-	position,
-	rotation,
-}: {
-	position: [number, number, number];
-	rotation?: [number, number, number];
-}) {
-	const { scene } = useGLTF("/models/naboo_starfighter.glb");
-	return (
-		<primitive
-			object={scene}
-			position={position}
-			rotation={rotation}
-			scale={[2.5, 2.5, 2.5]}
-		/>
-	);
-}
 
 export function Hero() {
 	const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });

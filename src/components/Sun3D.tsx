@@ -57,7 +57,7 @@ function SunModel({ scale = 1, speed = 1 }: Sun3DProps) {
 export function Sun3D({
 	scale = 1,
 	speed = 1,
-	hyperjumping = false,
+	// hyperjumping = false,
 	hyperjumpProgress = 0,
 }: Sun3DProps) {
 	// Hide the sun during hyperjump

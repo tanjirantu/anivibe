@@ -18,7 +18,7 @@ const scale = 2;
 
 function NabooStarfighterModel({ rotation = 0 }: { rotation?: number }) {
 	const { scene } = useGLTF("/models/astronaut_floating_in_space.glb");
-	const group = useRef<any>(null);
+	const group = useRef<THREE.Group>(null);
 	useFrame(() => {
 		if (group.current) {
 			group.current.rotation.z = rotation;
@@ -53,46 +53,11 @@ function NabooStarfighterModel({ rotation = 0 }: { rotation?: number }) {
 	);
 }
 
-// Laser beam component
-function LaserBeam({ from, to }: { from: THREE.Vector3; to: THREE.Vector3 }) {
-	const ref = useRef<THREE.Mesh>(null);
-
-	useEffect(() => {
-		if (!ref.current) return;
-
-		// Calculate direction and length
-		const direction = new THREE.Vector3().subVectors(to, from).normalize();
-		const distance = from.distanceTo(to);
-
-		// Position laser at midpoint
-		const midpoint = new THREE.Vector3().addVectors(
-			from,
-			new THREE.Vector3().copy(direction).multiplyScalar(distance / 2)
-		);
-		ref.current.position.copy(midpoint);
-
-		// Rotate laser to match direction
-		ref.current.lookAt(to);
-
-		// Scale laser to match distance
-		ref.current.scale.set(0.3, 0.3, distance);
-	}, [from, to]);
-
-	return (
-		<mesh ref={ref}>
-			<cylinderGeometry args={[0.1, 0.1, 1, 8]} />
-			<meshBasicMaterial color="#ff2d55" />
-		</mesh>
-	);
-}
-
 // Moving ship component with animation
 function MovingShip({
 	posX,
 	posY,
 	rotation,
-	targetX,
-	targetY,
 }: {
 	posX: number;
 	posY: number;
@@ -100,16 +65,9 @@ function MovingShip({
 	targetX?: number;
 	targetY?: number;
 }) {
-	const shipRef = useRef<any>(null);
+	const shipRef = useRef<THREE.Group>(null);
 	const [isFiring, setIsFiring] = useState(false);
-	const [shipPosition, setShipPosition] = useState(
-		new THREE.Vector3(posX, posY, -100)
-	);
-	const [targetPosition, setTargetPosition] = useState(
-		targetX && targetY
-			? new THREE.Vector3(targetX, targetY, 30)
-			: new THREE.Vector3(0, 0, 50)
-	);
+	const [, setShipPosition] = useState(new THREE.Vector3(posX, posY, -100));
 
 	// Add turbulence effect values
 	const turbulenceRef = useRef({
@@ -248,31 +206,36 @@ const StarFighter: React.FC<StarFighter3DProps> = ({
 	targetX,
 	targetY,
 }) => {
-	if (!visible) return null;
-
-	// Safe handling of window references
+	// Initialize state here to ensure hooks are always called in the same order
 	const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
 	useEffect(() => {
 		// Update window dimensions only on client side
 		const handleResize = () => {
-			setWindowSize({
-				width: window.innerWidth,
-				height: window.innerHeight,
-			});
+			if (typeof window !== "undefined") {
+				setWindowSize({
+					width: window.innerWidth,
+					height: window.innerHeight,
+				});
+			}
 		};
 
 		// Initial size
+		handleResize();
+
+		// Add event listener (only in browser)
 		if (typeof window !== "undefined") {
-			handleResize();
-
-			// Add event listener
 			window.addEventListener("resize", handleResize);
-
 			// Cleanup
 			return () => window.removeEventListener("resize", handleResize);
 		}
 	}, []);
+
+	// If not visible, return null
+	if (!visible) return null;
+
+	// Don't render during SSR
+	if (typeof window === "undefined") return null;
 
 	// Convert screen x/y to Three.js coordinates (centered)
 	const posX = x - windowSize.width / 2;
@@ -281,9 +244,6 @@ const StarFighter: React.FC<StarFighter3DProps> = ({
 	// Convert target coordinates
 	const targetPosX = targetX ? targetX - windowSize.width / 2 : undefined;
 	const targetPosY = targetY ? -(targetY - windowSize.height / 2) : undefined;
-
-	// Return null during SSR
-	if (typeof window === "undefined") return null;
 
 	return (
 		<div
