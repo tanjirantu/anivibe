@@ -12,6 +12,9 @@ import { StarfieldCanvas } from "./StarfieldCanvas";
 import { useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import Austronaut from "./Austronaut";
+import { Nebula3D } from "./Nebula3D";
+import { SpaceEffect3D } from "./SpaceEffect3D";
+// import { FloatingAsteroids } from "./FloatingAsteroids";
 
 // Camera component for cockpit POV with cursor-based movement
 function CameraCockpitPOV({
@@ -140,9 +143,12 @@ export function Hero() {
 	const [dustSpeed, setDustSpeed] = useState(1);
 	const [starfighterSpeed, setStarfighterSpeed] = useState(1);
 	const [planetSize, setPlanetSize] = useState(1);
+	const [is3DNebula, setIs3DNebula] = useState(true);
+	const [nebulaModelIndex, setNebulaModelIndex] = useState(1);
 
 	// Cockpit and starfield speed state
 	const [isCockpit, setIsCockpit] = useState(false);
+	const [povIndex, setPovIndex] = useState(0); // 0: Normal, 1: Cockpit, 2: First Person
 	const [starSpeed, setStarSpeed] = useState(0.0035);
 
 	// Hyperjump animation state
@@ -151,13 +157,29 @@ export function Hero() {
 
 	// Sky background variant state
 	const [galaxyIndex, setGalaxyIndex] = useState(0);
-	const handleNextGalaxy = () =>
+	const handleNextGalaxy = () => {
 		setGalaxyIndex((i) => (i + 1) % GALAXY_VARIANTS.length);
+		// Switch to 2D nebula mode when changing galaxy backgrounds
+		setIs3DNebula(false);
+	};
+
+	// Handle POV change
+	const handlePovChange = () => {
+		setPovIndex((prev) => (prev + 1) % 3);
+		if (povIndex === 0) {
+			setIsCockpit(false);
+		} else if (povIndex === 1) {
+			setIsCockpit(true);
+		} else {
+			setIsCockpit(false);
+		}
+	};
 
 	// Cockpit view handler (used for both Hyperjump and Cockpit buttons)
-	const handleCockpitView = () => {
-		setIsCockpit(true);
-	};
+	// const handleCockpitView = () => {
+	// 	setIsCockpit(true);
+	// 	setPovIndex(1);
+	// };
 
 	// New Hyperjump animation handler
 	const handleHyperjump = () => {
@@ -239,8 +261,23 @@ export function Hero() {
 
 			{/* Immersive Starfield Canvas (always rendered as background) */}
 			<StarfieldCanvas
-				starSpeed={starSpeed}
-				shake={hyperjumping ? hyperjumpProgress : 0}
+				starSpeed={starSpeed * dustSpeed}
+				shake={hyperjumping ? 0.5 : 0}
+			/>
+
+			{/* 3D Nebula */}
+			<Nebula3D
+				visible={is3DNebula}
+				modelIndex={nebulaModelIndex}
+				hyperjumping={hyperjumping}
+				hyperjumpProgress={hyperjumpProgress}
+			/>
+
+			{/* Space Effect */}
+			<SpaceEffect3D
+				visible={!is3DNebula}
+				hyperjumping={hyperjumping}
+				hyperjumpProgress={hyperjumpProgress}
 			/>
 
 			{/* Cockpit View */}
@@ -328,6 +365,9 @@ export function Hero() {
 				<>
 					{/* 3D Models */}
 					<div className="absolute inset-0 w-full h-full z-10">
+						{/* Add FloatingAsteroids before other 3D models */}
+						{/* <FloatingAsteroids /> */}
+
 						{/* Sun - positioned in the far side of the scene */}
 						<Sun3D
 							scale={planetSize * 1}
@@ -483,6 +523,7 @@ export function Hero() {
 									hyperjumpProgress > 0
 										? 1 - hyperjumpProgress / 0.2
 										: 1,
+								display: is3DNebula ? "none" : "block",
 							}}
 						/>
 
@@ -519,19 +560,21 @@ export function Hero() {
 						</div>
 						*/}
 
-						{/* Nebula Effects */}
-						<div className="absolute inset-0">
-							{/* Purple Nebula */}
-							<div className="absolute top-[10%] left-[20%] w-[300px] h-[300px] rounded-full bg-purple-500/20 blur-[100px]" />
-							<div className="absolute top-[15%] left-[25%] w-[200px] h-[200px] rounded-full bg-purple-600/20 blur-[80px]" />
+						{/* Nebula Effects - only show in 2D mode */}
+						{!is3DNebula && (
+							<div className="absolute inset-0">
+								{/* Purple Nebula */}
+								<div className="absolute top-[10%] left-[20%] w-[300px] h-[300px] rounded-full bg-purple-500/20 blur-[100px]" />
+								<div className="absolute top-[15%] left-[25%] w-[200px] h-[200px] rounded-full bg-purple-600/20 blur-[80px]" />
 
-							{/* Blue Nebula */}
-							<div className="absolute top-[30%] right-[20%] w-[250px] h-[250px] rounded-full bg-blue-500/20 blur-[90px]" />
-							<div className="absolute top-[35%] right-[25%] w-[150px] h-[150px] rounded-full bg-blue-600/20 blur-[70px]" />
+								{/* Blue Nebula */}
+								<div className="absolute top-[30%] right-[20%] w-[250px] h-[250px] rounded-full bg-blue-500/20 blur-[90px]" />
+								<div className="absolute top-[35%] right-[25%] w-[150px] h-[150px] rounded-full bg-blue-600/20 blur-[70px]" />
 
-							{/* Teal Accent */}
-							<div className="absolute bottom-[20%] left-[30%] w-[200px] h-[200px] rounded-full bg-teal-500/20 blur-[80px]" />
-						</div>
+								{/* Teal Accent */}
+								<div className="absolute bottom-[20%] left-[30%] w-[200px] h-[200px] rounded-full bg-teal-500/20 blur-[80px]" />
+							</div>
+						)}
 
 						{/* Cosmic Dust */}
 						<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.3)_70%,_rgba(0,0,0,0.4)_100%)]" />
@@ -552,7 +595,7 @@ export function Hero() {
 							<>
 								{/* Floating Asteroid */}
 								<div
-									className="absolute top-[60%] left-[30%] w-[32px] h-[32px] animate-float-asteroid"
+									className="absolute top-[20%] left-[30%] w-[32px] h-[32px] animate-float-asteroid"
 									style={{
 										opacity:
 											hyperjumpProgress > 0
@@ -561,7 +604,7 @@ export function Hero() {
 									}}
 								>
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast01.png"
 										alt="Asteroid"
 										width={32}
 										height={32}
@@ -570,18 +613,37 @@ export function Hero() {
 								</div>
 
 								{/* Asteroid Group 1 */}
-								<div className="absolute top-[40%] left-[15%] w-[24px] h-[24px] animate-float-asteroid-1">
+								<div className="absolute top-[40%] right-[25%] w-[24px] h-[24px] animate-float-asteroid-1">
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast02.png"
 										alt="Asteroid"
 										width={24}
 										height={24}
 										className="w-full h-full object-contain"
 									/>
 								</div>
-								<div className="absolute top-[45%] left-[18%] w-[20px] h-[20px] animate-float-asteroid-2">
+								<div className="absolute top-[36%] right-[25%] w-[14px] h-[14px] animate-float-asteroid-1">
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast01.png"
+										alt="Asteroid"
+										width={34}
+										height={34}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+								<div className="absolute top-[36%] right-[25%] w-[14px] h-[14px] animate-float-asteroid-1">
+									<Image
+										src="/assets/ast04.png"
+										alt="Asteroid"
+										width={34}
+										height={34}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+
+								<div className="absolute top-[45%] right-[20%] w-[20px] h-[20px] animate-float-asteroid-2">
+									<Image
+										src="/assets/ast01.png"
 										alt="Asteroid"
 										width={20}
 										height={20}
@@ -590,10 +652,10 @@ export function Hero() {
 								</div>
 								<div className="absolute top-[38%] left-[20%] w-[28px] h-[28px] animate-float-asteroid-3">
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast04.png"
 										alt="Asteroid"
-										width={28}
-										height={28}
+										width={12}
+										height={12}
 										className="w-full h-full object-contain"
 									/>
 								</div>
@@ -601,7 +663,7 @@ export function Hero() {
 								{/* Asteroid Group 2 */}
 								<div className="absolute top-[70%] right-[25%] w-[18px] h-[18px] animate-float-asteroid-4">
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast05.png"
 										alt="Asteroid"
 										width={18}
 										height={18}
@@ -610,7 +672,7 @@ export function Hero() {
 								</div>
 								<div className="absolute top-[75%] right-[28%] w-[16px] h-[16px] animate-float-asteroid-5">
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast02.png"
 										alt="Asteroid"
 										width={16}
 										height={16}
@@ -619,7 +681,7 @@ export function Hero() {
 								</div>
 								<div className="absolute top-[72%] right-[22%] w-[12px] h-[12px] animate-float-asteroid-6">
 									<Image
-										src="/assets/astroid_01.png"
+										src="/assets/ast01.png"
 										alt="Asteroid"
 										width={12}
 										height={12}
@@ -682,10 +744,14 @@ export function Hero() {
 						planetSize={planetSize}
 						onPlanetSizeChange={setPlanetSize}
 						onHyperspeedJump={handleHyperjump}
-						onCockpitView={handleCockpitView}
+						onCockpitView={handlePovChange}
 						onReset={handleReset}
 						galaxyName={GALAXY_VARIANTS[galaxyIndex].name}
 						onNextGalaxy={handleNextGalaxy}
+						is3DNebula={is3DNebula}
+						onNebulaToggle={() => setIs3DNebula(!is3DNebula)}
+						nebulaModelIndex={nebulaModelIndex}
+						onNebulaModelChange={setNebulaModelIndex}
 					/>
 
 					{/* Render Astronaut at center of the screen - hide during hyperjump */}

@@ -69,15 +69,15 @@ export function Saturn3D({
 
 	return (
 		<div
-			className="absolute top-[30%] right-[15%] w-full h-full"
+			className="absolute top-[30%] right-[15%] w-full h-full md:right-[0%] md:top-[35%] sm:right-[5%]"
 			style={{
 				transform: `scale(${scale})`,
 				opacity,
 			}}
 		>
 			<Canvas
-				camera={{ position: [0, 0, 5], fov: 70 }}
-				// style={{ background: "transparent" }}
+				camera={{ position: [0, 0, 5], fov: 65 }}
+				style={{ background: "transparent" }}
 			>
 				{/* Ambient light for general illumination */}
 				<ambientLight intensity={0.75} />
