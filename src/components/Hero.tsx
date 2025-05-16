@@ -591,7 +591,7 @@ export function Hero() {
 						{/* Floating Alien Ship - Removed as it's now part of Planet3D */}
 
 						{/* Floating Asteroids - hide during hyperjump */}
-						{(!hyperjumping || hyperjumpProgress < 0.2) && (
+						{!hyperjumping && hyperjumpProgress === 0 && (
 							<>
 								{/* Floating Asteroid */}
 								<div
