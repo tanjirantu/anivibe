@@ -48,11 +48,11 @@ function NebulaModel({
 		if (hyperjumping) {
 			if (modelIndex === 1) {
 				// Skydome 1 animation - smoother acceleration
-				const rotationSpeed = 0.1 + hyperjumpProgress * 0.4; // Start slower, accelerate more gradually
+				const rotationSpeed = 0.1 + hyperjumpProgress * 0.1; // Start slower, accelerate more gradually
 				meshRef.current.rotation.y += delta * rotationSpeed;
-				const scale = 1 + hyperjumpProgress * 0.5;
-				meshRef.current.scale.set(scale, scale * 0.09, scale);
-				meshRef.current.position.z = hyperjumpProgress * 5;
+				const scale = 0.5 + hyperjumpProgress * 0.5;
+				meshRef.current.scale.set(scale, scale * 1, scale);
+				meshRef.current.position.z = hyperjumpProgress * 3;
 			} else if (modelIndex === 2) {
 				// Skydome 2 animation - smoother acceleration
 				const rotationSpeed = 0.1 + hyperjumpProgress * 0.4; // Start slower, accelerate more gradually

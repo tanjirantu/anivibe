@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StarFighter3D } from "./StarFighter3D";
 import { Planet3D } from "./Planet3D";
 import { Saturn3D } from "./Saturn3D";
-import { Juno3D } from "./Juno3D";
+// import { Juno3D } from "./Juno3D";
 import { Sun3D } from "./Sun3D";
 import { ControlPanel } from "./ControlPanel";
 import Image from "next/image";
@@ -14,6 +14,8 @@ import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import Austronaut from "./Austronaut";
 import { Nebula3D } from "./Nebula3D";
 import { SpaceEffect3D } from "./SpaceEffect3D";
+import { LuminarisStarship } from "./LuminarisStarship";
+import { SpaceshipEzno3D } from "./SpaceshipEzno3D";
 // import { FloatingAsteroids } from "./FloatingAsteroids";
 
 // Camera component for cockpit POV with cursor-based movement
@@ -145,6 +147,7 @@ export function Hero() {
 	const [planetSize, setPlanetSize] = useState(1);
 	const [is3DNebula, setIs3DNebula] = useState(true);
 	const [nebulaModelIndex, setNebulaModelIndex] = useState(1);
+	const [spaceshipModelIndex, setSpaceshipModelIndex] = useState(0);
 
 	// Cockpit and starfield speed state
 	const [isCockpit, setIsCockpit] = useState(false);
@@ -185,20 +188,27 @@ export function Hero() {
 	const handleHyperjump = () => {
 		setHyperjumping(true);
 		setIsCockpit(false);
-		let progress = 0;
+
+		// Use requestAnimationFrame with timestamp for smoother animation
+		let startTime: number | null = null;
 		const duration = 1800; // ms
-		const start = performance.now();
-		function animate(now: DOMHighResTimeStamp) {
-			progress = Math.min((now - start) / duration, 1);
+
+		function animate(timestamp: number) {
+			if (!startTime) startTime = timestamp;
+			const elapsed = timestamp - startTime;
+			const progress = Math.min(elapsed / duration, 1);
+
+			// Use RAF timestamp for smoother updates
 			setHyperjumpProgress(progress);
-			// Animate starSpeed from 0.0035 to 0.02
 			setStarSpeed(0.0035 + (0.02 - 0.0035) * progress);
+
 			if (progress < 1) {
 				requestAnimationFrame(animate);
 			} else {
-				setHyperjumping(false); // Animation ends, keep close view
+				setHyperjumping(false);
 			}
 		}
+
 		requestAnimationFrame(animate);
 	};
 
@@ -369,12 +379,14 @@ export function Hero() {
 						{/* <FloatingAsteroids /> */}
 
 						{/* Sun - positioned in the far side of the scene */}
-						<Sun3D
-							scale={planetSize * 1}
-							speed={starfighterSpeed}
-							hyperjumping={hyperjumping}
-							hyperjumpProgress={hyperjumpProgress}
-						/>
+						{!is3DNebula && (
+							<Sun3D
+								scale={planetSize * 1}
+								speed={starfighterSpeed}
+								hyperjumping={hyperjumping}
+								hyperjumpProgress={hyperjumpProgress}
+							/>
+						)}
 
 						{/* These components will be conditionally rendered based on hyperjump state */}
 						{/* Each component has its own visibility logic now */}
@@ -389,22 +401,46 @@ export function Hero() {
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
 						/>
-						{/* StarFighter3D is always visible, even during hyperjump */}
-						<StarFighter3D
-							speed={starfighterSpeed}
-							hyperjumping={hyperjumping}
-							hyperjumpProgress={hyperjumpProgress}
-							mouseX={
-								typeof window !== "undefined"
-									? cursorPosition.x / window.innerWidth
-									: 0.5
-							}
-						/>
-						<Juno3D
+						{/* StarFighter3D or LuminarisStarship based on modelIndex */}
+						{spaceshipModelIndex === 0 ? (
+							<StarFighter3D
+								speed={starfighterSpeed}
+								hyperjumping={hyperjumping}
+								hyperjumpProgress={hyperjumpProgress}
+								mouseX={
+									typeof window !== "undefined"
+										? cursorPosition.x / window.innerWidth
+										: 0.5
+								}
+							/>
+						) : spaceshipModelIndex === 1 ? (
+							<LuminarisStarship
+								speed={starfighterSpeed}
+								hyperjumping={hyperjumping}
+								hyperjumpProgress={hyperjumpProgress}
+								mouseX={
+									typeof window !== "undefined"
+										? cursorPosition.x / window.innerWidth
+										: 0.5
+								}
+							/>
+						) : (
+							<SpaceshipEzno3D
+								speed={starfighterSpeed}
+								hyperjumping={hyperjumping}
+								hyperjumpProgress={hyperjumpProgress}
+								mouseX={
+									typeof window !== "undefined"
+										? cursorPosition.x / window.innerWidth
+										: 0.5
+								}
+							/>
+						)}
+						{/* <Juno3D
 							scale={planetSize}
 							hyperjumping={hyperjumping}
 							hyperjumpProgress={hyperjumpProgress}
-						/>
+						/> */}
 
 						{/* Comets Canvas */}
 						{!hyperjumping && (
@@ -613,7 +649,7 @@ export function Hero() {
 								</div>
 
 								{/* Asteroid Group 1 */}
-								<div className="absolute top-[40%] right-[25%] w-[24px] h-[24px] animate-float-asteroid-1">
+								{/* <div className="absolute top-[40%] right-[25%] w-[24px] h-[24px] animate-float-asteroid-1">
 									<Image
 										src="/assets/ast02.png"
 										alt="Asteroid"
@@ -621,8 +657,8 @@ export function Hero() {
 										height={24}
 										className="w-full h-full object-contain"
 									/>
-								</div>
-								<div className="absolute top-[36%] right-[25%] w-[14px] h-[14px] animate-float-asteroid-1">
+								</div> */}
+								{/* <div className="absolute top-[36%] right-[25%] w-[14px] h-[14px] animate-float-asteroid-1">
 									<Image
 										src="/assets/ast01.png"
 										alt="Asteroid"
@@ -630,8 +666,8 @@ export function Hero() {
 										height={34}
 										className="w-full h-full object-contain"
 									/>
-								</div>
-								<div className="absolute top-[36%] right-[25%] w-[14px] h-[14px] animate-float-asteroid-1">
+								</div> */}
+								{/* <div className="absolute top-[36%] right-[25%] w-[14px] h-[14px] animate-float-asteroid-1">
 									<Image
 										src="/assets/ast04.png"
 										alt="Asteroid"
@@ -639,7 +675,7 @@ export function Hero() {
 										height={34}
 										className="w-full h-full object-contain"
 									/>
-								</div>
+								</div> */}
 
 								<div className="absolute top-[45%] right-[20%] w-[20px] h-[20px] animate-float-asteroid-2">
 									<Image
@@ -650,7 +686,7 @@ export function Hero() {
 										className="w-full h-full object-contain"
 									/>
 								</div>
-								<div className="absolute top-[38%] left-[20%] w-[28px] h-[28px] animate-float-asteroid-3">
+								{/* <div className="absolute top-[38%] left-[20%] w-[28px] h-[28px] animate-float-asteroid-3">
 									<Image
 										src="/assets/ast04.png"
 										alt="Asteroid"
@@ -658,10 +694,10 @@ export function Hero() {
 										height={12}
 										className="w-full h-full object-contain"
 									/>
-								</div>
+								</div> */}
 
 								{/* Asteroid Group 2 */}
-								<div className="absolute top-[70%] right-[25%] w-[18px] h-[18px] animate-float-asteroid-4">
+								{/* <div className="absolute top-[70%] right-[25%] w-[18px] h-[18px] animate-float-asteroid-4">
 									<Image
 										src="/assets/ast05.png"
 										alt="Asteroid"
@@ -669,8 +705,8 @@ export function Hero() {
 										height={18}
 										className="w-full h-full object-contain"
 									/>
-								</div>
-								<div className="absolute top-[75%] right-[28%] w-[16px] h-[16px] animate-float-asteroid-5">
+								</div> */}
+								<div className="absolute top-[25%] right-[28%] w-[16px] h-[16px] animate-float-asteroid-5">
 									<Image
 										src="/assets/ast02.png"
 										alt="Asteroid"
@@ -679,7 +715,17 @@ export function Hero() {
 										className="w-full h-full object-contain"
 									/>
 								</div>
-								<div className="absolute top-[72%] right-[22%] w-[12px] h-[12px] animate-float-asteroid-6">
+
+								<div className="absolute top-[22%] right-[29%] w-[12px] h-[12px] animate-float-asteroid-5">
+									<Image
+										src="/assets/ast02.png"
+										alt="Asteroid"
+										width={16}
+										height={16}
+										className="w-full h-full object-contain"
+									/>
+								</div>
+								<div className="absolute top-[25%] right-[32%] w-[24px] h-[24px] animate-float-asteroid-6">
 									<Image
 										src="/assets/ast01.png"
 										alt="Asteroid"
@@ -692,11 +738,11 @@ export function Hero() {
 						)}
 
 						{/* Comets - hide during hyperjump */}
-						{!hyperjumping && (
+						{!hyperjumping && hyperjumpProgress < 0.2 && (
 							<>
-								{/* Comet 1 */}
+								{/* Comet 1 - Slow */}
 								<div
-									className="absolute top-0 left-[-40px] w-[40px] h-[40px] animate-comet-1"
+									className="absolute top-0 left-[-40px] w-[40px] h-[40px] animate-comet-2"
 									style={{
 										opacity:
 											hyperjumpProgress > 0
@@ -705,7 +751,45 @@ export function Hero() {
 									}}
 								>
 									<Image
-										src="/assets/comet_04.png"
+										src="/assets/comet_03.png"
+										alt="Comet"
+										width={40}
+										height={40}
+										className="w-full h-full object-contain"
+									/>
+									<div className="absolute inset-0 w-full h-full bg-white/30 blur-[20px] animate-comet-trail-1"></div>
+								</div>
+								{/* Comet 2 - Medium */}
+								<div
+									className="absolute top-7 left-[-75px] w-[28px] h-[32px] animate-comet-1"
+									style={{
+										opacity:
+											hyperjumpProgress > 0
+												? 1 - hyperjumpProgress / 0.5
+												: 1,
+									}}
+								>
+									<Image
+										src="/assets/comet_03.png"
+										alt="Comet"
+										width={40}
+										height={40}
+										className="w-full h-full object-contain"
+									/>
+									<div className="absolute inset-0 w-full h-full bg-white/30 blur-[20px] animate-comet-trail-1"></div>
+								</div>
+								{/* Comet 3 - Fast */}
+								<div
+									className="absolute top-10 left-[-35px] w-[32px] h-[32px] animate-comet-3"
+									style={{
+										opacity:
+											hyperjumpProgress > 0
+												? 1 - hyperjumpProgress / 0.2
+												: 1,
+									}}
+								>
+									<Image
+										src="/assets/comet_03.png"
 										alt="Comet"
 										width={40}
 										height={40}
@@ -752,6 +836,8 @@ export function Hero() {
 						onNebulaToggle={() => setIs3DNebula(!is3DNebula)}
 						nebulaModelIndex={nebulaModelIndex}
 						onNebulaModelChange={setNebulaModelIndex}
+						spaceshipModelIndex={spaceshipModelIndex}
+						onSpaceshipModelChange={setSpaceshipModelIndex}
 					/>
 
 					{/* Render Astronaut at center of the screen - hide during hyperjump */}
@@ -1143,7 +1229,10 @@ export function Hero() {
 					animation: comet-1 8s linear infinite;
 				}
 				.animate-comet-2 {
-					animation: comet-2 3s linear infinite;
+					animation: comet-1 12s linear infinite;
+				}
+				.animate-comet-3 {
+					animation: comet-1 6s linear infinite;
 				}
 				.animate-comet-trail-1 {
 					animation: comet-trail-1 3s linear infinite;

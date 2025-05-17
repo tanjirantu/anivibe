@@ -1,25 +1,42 @@
 "use client";
 
 import { useRef, useMemo } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
+import { useFrame, Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import React from "react";
+import { OrbitControls } from "@react-three/drei";
 
-const SCALE = 0.2;
-// const FLY_SPEED = 0.0007;
-// const START_Y = -5; // Start from bottom of screen
-// const END_Y = 10; // End at top of screen
-// const Z_SPEED = 0.09; // Speed of movement towards the viewer
-// const MIN_Z = -20; // Minimum z position before reset
+const SCALE = 0.7;
 
-interface StarFighter3DProps {
+interface LuminarisStarshipProps {
 	speed?: number;
-	zooming?: boolean;
 	hyperjumping?: boolean;
 	hyperjumpProgress?: number;
-	mouseX?: number; // Add mouse X position to control starfighter during hyperjump
-	modelIndex?: number; // Add model index to switch between ships
+	mouseX?: number;
+}
+
+// Camera zoom animation component
+function CameraZoom({
+	hyperjumping = false,
+	hyperjumpProgress = 0,
+}: {
+	hyperjumping?: boolean;
+	hyperjumpProgress?: number;
+}) {
+	const { camera } = useThree();
+	useFrame(() => {
+		// Zoom in during hyperjump
+		if (hyperjumping) {
+			camera.position.z = 15 - 0 * hyperjumpProgress; // More dramatic zoom
+			// camera.position.y = -10 + 10 * hyperjumpProgress; // Move up during zoom
+			camera.updateProjectionMatrix();
+		} else {
+			camera.position.z = 15;
+			camera.position.y = 0;
+			camera.updateProjectionMatrix();
+		}
+	});
+	return null;
 }
 
 // Function to create asteroid rocks during hyperjump
@@ -137,29 +154,14 @@ function AsteroidField({ hyperjumping = false, hyperjumpProgress = 0 }) {
 	);
 }
 
-function StarFighterModel({
+function LuminarisModel({
 	hyperjumpProgress = 0,
-	modelIndex = 0,
 }: {
 	hyperjumpProgress?: number;
-	modelIndex?: number;
 }) {
 	const group = useRef<THREE.Group | null>(null);
-	const { scene } = useGLTF(
-		modelIndex === 0
-			? "/models/spaceship_cb1.glb"
-			: "/models/luminaris_starship.glb"
-	);
 
-	// Pre-calculate animation values
-	// const animationValues = useMemo(
-	// 	() => ({
-	// 		turbulenceX: new Float32Array(100),
-	// 		turbulenceY: new Float32Array(100),
-	// 		turbulenceZ: new Float32Array(100),
-	// 	}),
-	// 	[]
-	// );
+	const { scene } = useGLTF("/models/spaceship_ezno.glb");
 
 	useFrame((state) => {
 		if (group.current) {
@@ -191,7 +193,7 @@ function StarFighterModel({
 			group.current.rotation.z =
 				-autoMovement * 0.01 * mouseControlStrength;
 			group.current.rotation.x = 0.2 + turbulenceY * 0.02;
-			group.current.rotation.y = 1.6 + turbulenceZ * 0.02;
+			group.current.rotation.y = Math.PI + turbulenceZ * 0.02;
 
 			// Optimize scale updates
 			const scale = 1 + hyperjumpProgress * 0.5;
@@ -202,8 +204,8 @@ function StarFighterModel({
 	return (
 		<group
 			ref={group}
-			position={[0, -5, 20]}
-			rotation={[0.2, 1.6, 0]}
+			position={[0, 0, 0]}
+			rotation={[0, Math.PI, 0]}
 			scale={[SCALE, SCALE, SCALE]}
 		>
 			<primitive object={scene} />
@@ -211,40 +213,59 @@ function StarFighterModel({
 	);
 }
 
-// Camera zoom animation component
-function CameraZoom({
-	hyperjumping = false,
-	hyperjumpProgress = 0,
-}: {
-	hyperjumping?: boolean;
-	hyperjumpProgress?: number;
-}) {
-	const { camera } = useThree();
-	useFrame(() => {
-		// Zoom in during hyperjump
-		if (hyperjumping) {
-			camera.position.z = 15 - 0 * hyperjumpProgress; // Zoom in
-			camera.updateProjectionMatrix();
-		} else {
-			camera.position.z = 15;
-			camera.updateProjectionMatrix();
-		}
-	});
-	return null;
-}
+// Crew Dragon component for horizontal movement
+// function CrewDragon() {
+// 	const group = useRef<any>(null);
+// 	const { scene } = useGLTF("/models/space_x_crew_dragon.glb");
 
-export function StarFighter3D({
+// 	useFrame((state) => {
+// 		if (group.current) {
+// 			const t = state.clock.getElapsedTime();
+
+// 			// Horizontal movement from left to right
+// 			// Using sine wave for smooth back and forth movement
+// 			const x = Math.sin(t * 0.2) * 30; // Reduced frequency from 0.5 to 0.2 for slower movement
+
+// 			// Calculate movement direction
+// 			const direction = Math.cos(t * 0.2); // Derivative of sin is cos
+
+// 			// Update position
+// 			group.current.position.x = x;
+
+// 			// Rotate based on movement direction
+// 			// When direction is positive (moving right), rotation is 0
+// 			// When direction is negative (moving left), rotation is Math.PI (180 degrees)
+// 			group.current.rotation.y = direction > 0 ? 0 : Math.PI;
+// 		}
+// 	});
+
+// 	return (
+// 		<group
+// 			ref={group}
+// 			position={[0, 5, -10]} // Moved back along z-axis to appear further away
+// 			rotation={[0, 0, 0]}
+// 			scale={[0.5, 0.5, 0.5]} // Keep the smaller scale
+// 		>
+// 			<primitive object={scene} />
+// 		</group>
+// 	);
+// }
+
+export function SpaceshipEzno3D({
 	// speed = 1,
-	// zooming = false,
 	hyperjumping = false,
 	hyperjumpProgress = 0,
-	// mouseX = 0.5, // Default to center
-	modelIndex = 0, // Default to first model
-}: StarFighter3DProps) {
+}: // mouseX = 0.5,
+LuminarisStarshipProps) {
 	return (
 		<div className="absolute inset-0 w-full h-full">
 			<Canvas
-				camera={{ position: [0, 0, 15], fov: 75 }}
+				camera={{
+					position: [0, 0, 15],
+					fov: 60,
+					near: 0.1,
+					far: 1000,
+				}}
 				style={{ background: "transparent" }}
 			>
 				{/* Camera zoom animation */}
@@ -256,17 +277,17 @@ export function StarFighter3D({
 				{/* Ambient light for general illumination */}
 				<ambientLight intensity={1.5} />
 
-				{/* Main directional light for the starfighter */}
+				{/* Main directional light for the starship */}
 				<directionalLight
 					position={[1, 5, 5]}
-					intensity={1}
+					intensity={5}
 					color="#ffffff"
 				/>
 
 				{/* Accent lights for engine glow */}
 				<pointLight
 					position={[0, 2, 0]}
-					intensity={2}
+					intensity={4}
 					color="#00ffff"
 					distance={5}
 				/>
@@ -283,11 +304,11 @@ export function StarFighter3D({
 					hyperjumpProgress={hyperjumpProgress}
 				/>
 
-				{/* Starfighter model */}
-				<StarFighterModel
-					hyperjumpProgress={hyperjumpProgress}
-					modelIndex={modelIndex}
-				/>
+				{/* Luminaris model */}
+				<LuminarisModel hyperjumpProgress={hyperjumpProgress} />
+
+				{/* Add Crew Dragon */}
+				{/* <CrewDragon /> */}
 
 				{/* Disable orbit controls for the flying animation */}
 				<OrbitControls
