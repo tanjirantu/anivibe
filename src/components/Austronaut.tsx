@@ -17,8 +17,9 @@ interface StarFighter3DProps {
 const scale = 2;
 
 function NabooStarfighterModel({ rotation = 0 }: { rotation?: number }) {
-	const [error] = useState<unknown>(null);
+	const [error, setError] = useState<Error | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [retryCount, setRetryCount] = useState(0);
 
 	const { scene } = useGLTF("/models/astronaut_floating_in_space.glb", true);
 
@@ -27,8 +28,17 @@ function NabooStarfighterModel({ rotation = 0 }: { rotation?: number }) {
 	useEffect(() => {
 		if (scene) {
 			setIsLoading(false);
+			setError(null);
+		} else if (retryCount < 3) {
+			// Retry loading after a delay
+			const timer = setTimeout(() => {
+				setRetryCount((prev) => prev + 1);
+			}, 2000);
+			return () => clearTimeout(timer);
+		} else {
+			setError(new Error("Failed to load model after multiple attempts"));
 		}
-	}, [scene]);
+	}, [scene, retryCount]);
 
 	useFrame(() => {
 		if (group.current) {
