@@ -204,8 +204,6 @@ export function Hero() {
 
 			if (progress < 1) {
 				requestAnimationFrame(animate);
-			} else {
-				setHyperjumping(false);
 			}
 		}
 
@@ -838,6 +836,7 @@ export function Hero() {
 						onNebulaModelChange={setNebulaModelIndex}
 						spaceshipModelIndex={spaceshipModelIndex}
 						onSpaceshipModelChange={setSpaceshipModelIndex}
+						hyperjumping={hyperjumping}
 					/>
 
 					{/* Render Astronaut at center of the screen - hide during hyperjump */}

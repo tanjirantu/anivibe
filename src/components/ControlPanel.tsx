@@ -31,6 +31,7 @@ interface ControlPanelProps {
 	onNebulaModelChange?: (index: number) => void;
 	spaceshipModelIndex: number;
 	onSpaceshipModelChange: (index: number) => void;
+	hyperjumping: boolean;
 }
 
 export function ControlPanel({
@@ -53,6 +54,7 @@ export function ControlPanel({
 	onNebulaModelChange,
 	spaceshipModelIndex,
 	onSpaceshipModelChange,
+	hyperjumping,
 }: ControlPanelProps) {
 	const [isMounted, setIsMounted] = useState(false);
 	const [isMobile, setIsMobile] = useState(false);
@@ -252,6 +254,7 @@ export function ControlPanel({
 						<div className="flex items-center gap-2">
 							<button
 								onClick={() => onSpaceshipModelChange(0)}
+								disabled={hyperjumping}
 								className="px-3 py-1 text-sm bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded transition-colors"
 							>
 								{spaceshipModelIndex === 0
@@ -424,11 +427,12 @@ export function ControlPanel({
 										e.preventDefault();
 										onSpaceshipModelChange(0);
 									}}
+									disabled={hyperjumping}
 									className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
 										spaceshipModelIndex === 0
 											? "bg-blue-600 text-white"
 											: "bg-gray-700/60 text-gray-300 hover:bg-gray-600/60"
-									}`}
+									} disabled:opacity-50 disabled:cursor-not-allowed`}
 								>
 									Starfighter
 								</button>
@@ -437,11 +441,12 @@ export function ControlPanel({
 										e.preventDefault();
 										onSpaceshipModelChange(2);
 									}}
+									disabled={hyperjumping}
 									className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
 										spaceshipModelIndex === 2
 											? "bg-blue-600 text-white"
 											: "bg-gray-700/60 text-gray-300 hover:bg-gray-600/60"
-									}`}
+									} disabled:opacity-50 disabled:cursor-not-allowed`}
 								>
 									Ezno
 								</button>
