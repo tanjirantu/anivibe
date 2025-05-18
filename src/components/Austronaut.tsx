@@ -17,30 +17,42 @@ interface StarFighter3DProps {
 const scale = 2;
 
 function NabooStarfighterModel({ rotation = 0 }: { rotation?: number }) {
-	const { scene } = useGLTF("/models/astronaut_floating_in_space.glb");
+	const [error] = useState<unknown>(null);
+	const [isLoading, setIsLoading] = useState(true);
+
+	const { scene } = useGLTF("/models/astronaut_floating_in_space.glb", true);
+
 	const group = useRef<THREE.Group>(null);
+
+	useEffect(() => {
+		if (scene) {
+			setIsLoading(false);
+		}
+	}, [scene]);
+
 	useFrame(() => {
 		if (group.current) {
 			group.current.rotation.z = rotation;
 		}
 	});
 
-	// // Set dark materials to silver
-	// useEffect(() => {
-	// 	if (!scene) return;
-	// 	scene.traverse((child: any) => {
-	// 		if (child.isMesh && child.material) {
-	// 			const mat = child.material;
-	// 			if (mat.color) {
-	// 				const { r, g, b } = mat.color;
-	// 				// If the color is dark (brightness < 0.3), set to silver
-	// 				if ((r + g + b) / 3 < 0.3) {
-	// 					mat.color.set("#C0C0C0");
-	// 				}
-	// 			}
-	// 		}
-	// 	});
-	// }, [scene]);
+	if (error) {
+		return (
+			<mesh>
+				<boxGeometry args={[1, 1, 1]} />
+				<meshStandardMaterial color="red" />
+			</mesh>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<mesh>
+				<boxGeometry args={[1, 1, 1]} />
+				<meshStandardMaterial color="gray" />
+			</mesh>
+		);
+	}
 
 	return (
 		<group
